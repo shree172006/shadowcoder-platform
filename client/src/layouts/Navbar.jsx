@@ -43,7 +43,6 @@ export default function Navbar() {
     { title: 'Job Simulations', path: '/simulations', icon: <Briefcase size={16} /> },
     { title: 'Problem Statements', path: '/problems', icon: <FileCode size={16} /> },
     { title: 'Learn Roadmaps', path: '/learn', icon: <BookOpen size={16} /> },
-    { title: 'Leaderboard', path: '/leaderboard', icon: <Trophy size={16} /> },
   ];
 
   return (
@@ -124,6 +123,9 @@ export default function Navbar() {
                     <Link to="/profile" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                       <UserIcon size={14} /> Profile & Unlocked Badges
                     </Link>
+                    <Link to="/leaderboard" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                      <Trophy size={14} className="text-amber-500" /> Global Leaderboard
+                    </Link>
                     {isAdmin && (
                       <Link to="/admin" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors">
                         <ShieldCheck size={14} /> Admin Studio
@@ -187,6 +189,14 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            <Link
+              to="/leaderboard"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-amber-500 hover:bg-amber-500/10 transition-all"
+            >
+              <Trophy size={16} />
+              <span>Global Leaderboard</span>
+            </Link>
           </div>
 
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 px-2">
