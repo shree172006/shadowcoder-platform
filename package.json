@@ -1,0 +1,21 @@
+{
+  "name": "shadowcoder-platform",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ShadowCoder - Gamified High-Performance Job Simulation & Developer Learning Platform",
+  "main": "start-dev.js",
+  "scripts": {
+    "dev": "node start-dev.js",
+    "start": "node start-dev.js",
+    "install:all": "npm install --prefix server && npm install --prefix client"
+  },
+  "keywords": [
+    "mern",
+    "fastapi",
+    "docker",
+    "gamification",
+    "realtime"
+  ],
+  "author": "DevTier Team",
+  "license": "ISC"
+}
