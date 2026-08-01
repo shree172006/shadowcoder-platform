@@ -3,17 +3,31 @@ import { apiClient } from '../lib/apiClient';
 
 const AuthContext = createContext(null);
 
+const SESSION_STORAGE_KEY = 'shadowcoder_user_session';
+
+const getStoredUser = () => {
+  try {
+    const saved = localStorage.getItem(SESSION_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(getStoredUser);
   const [loading, setLoading] = useState(true);
 
-  // Restore user session on application load
+  // Restore & sync user session on application load
   const fetchMe = useCallback(async () => {
     try {
       const data = await apiClient('/auth/me');
-      setUser(data.user || null);
+      if (data && data.user) {
+        setUser(data.user);
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.user));
+      }
     } catch (err) {
-      setUser(null);
+      // Keep existing stored user on network errors or offline
     } finally {
       setLoading(false);
     }
@@ -28,7 +42,10 @@ export function AuthProvider({ children }) {
       method: 'POST',
       body: { name, email, password, role, track },
     });
-    setUser(data.user);
+    if (data && data.user) {
+      setUser(data.user);
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.user));
+    }
     return data.user;
   }, []);
 
@@ -37,7 +54,10 @@ export function AuthProvider({ children }) {
       method: 'POST',
       body: { email, password },
     });
-    setUser(data.user);
+    if (data && data.user) {
+      setUser(data.user);
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.user));
+    }
     return data.user;
   }, []);
 
@@ -48,6 +68,7 @@ export function AuthProvider({ children }) {
       console.error('Logout error:', err);
     } finally {
       setUser(null);
+      localStorage.removeItem(SESSION_STORAGE_KEY);
     }
   }, []);
 
