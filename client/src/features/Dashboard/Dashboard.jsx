@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { Trophy, Rocket, Code2, Terminal, ArrowRight, ShieldCheck, Flame, Zap, Layers, Server, Play, Search, CheckCircle2, Sparkles, AlertTriangle, Clock } from 'lucide-react';
+import { Rocket, Flame, ArrowRight, Search } from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [dailyQuestClaimed, setDailyQuestClaimed] = useState(false);
 
   const userXp = user?.xp || 0;
   const userLevel = user?.level || 1;
@@ -110,39 +109,6 @@ export default function Dashboard() {
             >
               <Rocket size={16} /> Explore Scenarios
             </button>
-          </div>
-        </div>
-
-        {/* DAILY QUEST COMPULSION & XP PENALTY BANNER */}
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-indigo-500/10 border-2 border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-black text-xs uppercase tracking-wider">
-              <Clock size={18} /> Daily Compulsion Quest Active • Resets at Midnight
-            </div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              Complete 1 Job Simulation or Pass 1 Learn Test Today
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-              <AlertTriangle size={14} className="text-rose-500 shrink-0" />
-              <span>Penalty Warning: Missing your daily task incurs a <strong className="text-rose-500">-50 XP Penalty</strong> & resets streak to 0!</span>
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            {dailyQuestClaimed ? (
-              <span className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5">
-                <CheckCircle2 size={16} /> Daily Quest Complete (+100 XP)
-              </span>
-            ) : (
-              <button
-                onClick={() => {
-                  setDailyQuestClaimed(true);
-                }}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-md transition-all flex items-center gap-1.5"
-              >
-                <Zap size={16} className="fill-slate-950" /> Claim Daily Quest (+100 XP)
-              </button>
-            )}
           </div>
         </div>
 
