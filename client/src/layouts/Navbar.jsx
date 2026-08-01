@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Code, User as UserIcon, Settings, LogOut, ShieldCheck, Sun, Moon, Terminal, LayoutGrid } from 'lucide-react';
+import { 
+  Code, User as UserIcon, Settings, LogOut, ShieldCheck, Sun, Moon, 
+  Terminal, LayoutGrid, Menu, X, Trophy, BookOpen, Briefcase, FileCode 
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Navbar() {
@@ -8,6 +11,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Light / Dark Mode State
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -30,14 +34,16 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
     navigate('/login');
   };
 
   const navLinks = [
-    { title: 'Dashboard', path: '/' },
-    { title: 'Job Simulations', path: '/simulations' },
-    { title: 'Problem Statements', path: '/problems' },
-    { title: 'Learn Roadmaps', path: '/learn' },
+    { title: 'Dashboard', path: '/', icon: <LayoutGrid size={16} /> },
+    { title: 'Job Simulations', path: '/simulations', icon: <Briefcase size={16} /> },
+    { title: 'Problem Statements', path: '/problems', icon: <FileCode size={16} /> },
+    { title: 'Learn Roadmaps', path: '/learn', icon: <BookOpen size={16} /> },
+    { title: 'Leaderboard', path: '/leaderboard', icon: <Trophy size={16} /> },
   ];
 
   return (
@@ -45,7 +51,7 @@ export default function Navbar() {
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
         
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-2.5">
+        <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2.5">
           <img 
             src="/shadowcoder-logo.png" 
             alt="ShadowCoder Logo" 
@@ -56,7 +62,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* CENTER LINKS */}
+        {/* DESKTOP CENTER LINKS */}
         <div className="hidden lg:flex items-center gap-1">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path;
@@ -76,23 +82,24 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* RIGHT CONTROLS: Theme Toggle + Auth / Profile */}
-        <div className="flex items-center gap-3">
+        {/* RIGHT CONTROLS: Theme Toggle + Auth / Profile + Mobile Hamburger */}
+        <div className="flex items-center gap-2 sm:gap-3">
           
           {/* Light / Dark Mode Toggle Button */}
           <button
             onClick={toggleTheme}
             aria-label="Toggle Theme"
-            className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all hover:scale-105"
+            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all hover:scale-105"
           >
             {isDarkMode ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-indigo-600" />}
           </button>
 
+          {/* User Profile / Auth */}
           {user ? (
             <div className="relative">
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-3 p-1.5 pl-3 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 transition-all"
+                className="flex items-center gap-2 sm:gap-3 p-1 sm:pl-3 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 transition-all"
               >
                 <div className="text-right hidden sm:block">
                   <span className="block text-xs font-bold text-slate-900 dark:text-white leading-tight">{user.name}</span>
@@ -139,15 +146,55 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Link 
                 to="/login"
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-105"
+                className="px-3 sm:px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-105"
               >
-                Sign In / Join ShadowCoder
+                Sign In / Join
               </Link>
             </div>
           )}
+
+          {/* MOBILE HAMBURGER MENU BUTTON */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Mobile Menu"
+            className="lg:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-all"
+          >
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
 
       </div>
+
+      {/* MOBILE NAVIGATION DROPDOWN DRAWER */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed top-16 left-0 right-0 bg-white/95 dark:bg-[#07090e]/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 shadow-2xl p-4 space-y-2 z-50 animate-in slide-in-from-top-3 duration-200">
+          <div className="space-y-1">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.title}
+                  to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                    isActive
+                      ? 'bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 font-extrabold'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  }`}
+                >
+                  {link.icon}
+                  <span>{link.title}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 px-2">
+            <span>ShadowCoder Platform</span>
+            <span>v1.0.0</span>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
