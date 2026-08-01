@@ -5,7 +5,7 @@ import 'reactflow/dist/style.css';
 import { 
   BookOpen, Code2, Database, Terminal, ArrowLeft, CheckCircle, Lock, 
   Play, Plus, Layout, Server, PieChart, Layers, FileJson, Check, Zap, Search,
-  ShieldCheck, Edit3, Trash2, Save, X, Link2, Move, Menu, ChevronRight
+  ShieldCheck, Edit3, Trash2, Save, X, Link2, Move, Menu, ChevronRight, HelpCircle, AlertCircle, Award
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AdminConsoleModal from '../../components/AdminConsoleModal.jsx';
@@ -70,7 +70,13 @@ const INITIAL_NODES = [
       label: 'Variables & Types', 
       status: 'completed',
       overview: 'Master variable declarations (const, let, var), primitive data types, type coercion, and memory allocation in JavaScript/Python.',
-      codeSnippet: `// Variables & Types Overview\nconst name = "ShadowCoder Engineer";\nlet xp = 450;\ntypeof xp; // "number"`
+      codeSnippet: `// Variables & Types Overview\nconst name = "ShadowCoder Engineer";\nlet xp = 450;\ntypeof xp; // "number"`,
+      testQuestion: {
+        question: 'Which keyword declares a variable that CANNOT be reassigned in JavaScript?',
+        options: ['let', 'var', 'const', 'static'],
+        correctIndex: 2,
+        explanation: 'The `const` keyword creates a read-only reference to a value, preventing reassignment.'
+      }
     }, 
     type: 'default' 
   },
@@ -81,7 +87,13 @@ const INITIAL_NODES = [
       label: 'Control Flow', 
       status: 'completed',
       overview: 'Understand execution branch logic using if-else statements, switch cases, ternary operators, and loop iterations.',
-      codeSnippet: `// Control Flow Example\nif (xp > 400) {\n  console.log("Level Up Unlocked!");\n}`
+      codeSnippet: `// Control Flow Example\nif (xp > 400) {\n  console.log("Level Up Unlocked!");\n}`,
+      testQuestion: {
+        question: 'Which loop is guaranteed to execute its code block AT LEAST ONCE before evaluating the condition?',
+        options: ['for loop', 'while loop', 'do...while loop', 'for...in loop'],
+        correctIndex: 2,
+        explanation: 'A `do...while` loop executes its body once before checking the condition.'
+      }
     } 
   },
   { 
@@ -91,7 +103,13 @@ const INITIAL_NODES = [
       label: 'Data Structures', 
       status: 'active',
       overview: 'Explore arrays, hash maps, sets, queues, and tree traversals for efficient memory & time complexity.',
-      codeSnippet: `// Hash Map Example\nconst cache = new Map();\ncache.set("user_101", { name: "Elena" });`
+      codeSnippet: `// Hash Map Example\nconst cache = new Map();\ncache.set("user_101", { name: "Elena" });`,
+      testQuestion: {
+        question: 'What is the average time complexity of a key lookup in a Hash Map (Map)?',
+        options: ['O(N)', 'O(1)', 'O(N log N)', 'O(N^2)'],
+        correctIndex: 1,
+        explanation: 'Hash maps provide constant O(1) time complexity for key lookups on average.'
+      }
     } 
   },
   { 
@@ -101,7 +119,13 @@ const INITIAL_NODES = [
       label: 'OOP Basics', 
       status: 'locked',
       overview: 'Encapsulation, inheritance, polymorphism, and class constructors.',
-      codeSnippet: `class Developer {\n  constructor(name) { this.name = name; }\n}`
+      codeSnippet: `class Developer {\n  constructor(name) { this.name = name; }\n}`,
+      testQuestion: {
+        question: 'Which OOP concept allows a child class to inherit properties and methods from a parent class?',
+        options: ['Abstraction', 'Polymorphism', 'Inheritance', 'Encapsulation'],
+        correctIndex: 2,
+        explanation: 'Inheritance allows a subclass to reuse properties and methods of a superclass.'
+      }
     } 
   },
   { 
@@ -111,7 +135,13 @@ const INITIAL_NODES = [
       label: 'Functional Programming', 
       status: 'locked',
       overview: 'Pure functions, immutability, higher-order functions (map, filter, reduce), and function composition.',
-      codeSnippet: `const doubleXp = (xpList) => xpList.map(x => x * 2);`
+      codeSnippet: `const doubleXp = (xpList) => xpList.map(x => x * 2);`,
+      testQuestion: {
+        question: 'What defines a Pure Function in functional programming?',
+        options: ['It mutates global state', 'It produces side effects', 'Given the same inputs, it always returns the same output without side effects', 'It requires an async keyword'],
+        correctIndex: 2,
+        explanation: 'Pure functions are deterministic and cause zero side effects.'
+      }
     } 
   },
   { 
@@ -121,7 +151,13 @@ const INITIAL_NODES = [
       label: 'Final Project', 
       status: 'locked',
       overview: 'Build a production-ready asynchronous job simulation microservice.',
-      codeSnippet: `// Final Project Execution\nconsole.log("Deploying Production Microservice...");`
+      codeSnippet: `// Final Project Execution\nconsole.log("Deploying Production Microservice...");`,
+      testQuestion: {
+        question: 'Which HTTP status code signifies a successful resource creation?',
+        options: ['200 OK', '201 Created', '404 Not Found', '500 Internal Error'],
+        correctIndex: 1,
+        explanation: '201 Created indicates successful creation of a new resource.'
+      }
     } 
   },
 ];
@@ -142,6 +178,18 @@ export default function Learn() {
   const [toastMessage, setToastMessage] = useState(null);
   const [searchQuery, setSearchQuery] = useState(''); 
   const [mobileSyllabusOpen, setMobileSyllabusOpen] = useState(false);
+
+  // Quiz State for Active Lesson
+  const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [isQuizCorrect, setIsQuizCorrect] = useState(false);
+
+  // Reset quiz state when activeLesson changes
+  useEffect(() => {
+    setSelectedAnswerIndex(null);
+    setQuizSubmitted(false);
+    setIsQuizCorrect(false);
+  }, [activeLesson]);
 
   // Persistent States
   const [careerPaths, setCareerPaths] = useState(() => {
@@ -235,17 +283,30 @@ export default function Learn() {
     parentId: '',
     overview: '',
     codeSnippet: '',
+    question: '',
+    optionA: '',
+    optionB: '',
+    optionC: '',
+    optionD: '',
+    correctIndex: 0,
   });
 
   const handleOpenNodeEditor = (node = null, isNew = false) => {
     if (node) {
       const parentEdge = edges.find((e) => e.target === node.id);
+      const q = node.data?.testQuestion || {};
       setNodeFormData({
         label: node.data?.label || '',
         status: node.data?.status || 'active',
         parentId: parentEdge ? parentEdge.source : '',
         overview: node.data?.overview || 'Module overview content...',
         codeSnippet: node.data?.codeSnippet || '// Code example',
+        question: q.question || 'Enter test question...',
+        optionA: q.options?.[0] || 'Option 1',
+        optionB: q.options?.[1] || 'Option 2',
+        optionC: q.options?.[2] || 'Option 3',
+        optionD: q.options?.[3] || 'Option 4',
+        correctIndex: q.correctIndex || 0,
       });
     } else {
       const lastNode = nodes[nodes.length - 1];
@@ -255,6 +316,12 @@ export default function Learn() {
         parentId: lastNode ? lastNode.id : '',
         overview: 'Write lesson explanation and requirements here...',
         codeSnippet: '// Write code example here',
+        question: 'Enter test question...',
+        optionA: 'Option 1',
+        optionB: 'Option 2',
+        optionC: 'Option 3',
+        optionD: 'Option 4',
+        correctIndex: 0,
       });
     }
     setNodeEditorModal({ isOpen: true, node, isNew });
@@ -264,6 +331,13 @@ export default function Learn() {
     e.preventDefault();
     let updatedNodes = [...nodes];
     let updatedEdges = [...edges];
+
+    const testQuestionObj = {
+      question: nodeFormData.question,
+      options: [nodeFormData.optionA, nodeFormData.optionB, nodeFormData.optionC, nodeFormData.optionD],
+      correctIndex: Number(nodeFormData.correctIndex),
+      explanation: 'Correct answer selected based on module concept.',
+    };
 
     if (nodeEditorModal.isNew) {
       const newNodeId = `${Date.now()}`;
@@ -279,6 +353,7 @@ export default function Learn() {
           status: nodeFormData.status,
           overview: nodeFormData.overview,
           codeSnippet: nodeFormData.codeSnippet,
+          testQuestion: testQuestionObj,
         },
       };
 
@@ -299,7 +374,7 @@ export default function Learn() {
 
       setNodes(updatedNodes);
       setEdges(updatedEdges);
-      showToast("New Node & Link Created!");
+      showToast("New Node & Test Challenge Created!");
     } else if (nodeEditorModal.node) {
       const targetId = nodeEditorModal.node.id;
 
@@ -313,6 +388,7 @@ export default function Learn() {
                 status: nodeFormData.status,
                 overview: nodeFormData.overview,
                 codeSnippet: nodeFormData.codeSnippet,
+                testQuestion: testQuestionObj,
               },
             }
           : n
@@ -346,10 +422,11 @@ export default function Learn() {
             status: nodeFormData.status,
             overview: nodeFormData.overview,
             codeSnippet: nodeFormData.codeSnippet,
+            testQuestion: testQuestionObj,
           },
         });
       }
-      showToast("Node Content & Connections Saved!");
+      showToast("Node Content & Verification Test Saved!");
     }
 
     await syncWithBackend(updatedNodes, updatedEdges);
@@ -435,7 +512,7 @@ export default function Learn() {
 
   const handleNodeClick = (event, node) => {
     if (node.data.status === 'locked' && !isAdmin) {
-      showToast("This module is locked. Complete previous modules first.");
+      showToast("This module is locked. Pass previous module test to unlock!");
     } else {
       setActiveLesson(node);
       setMobileSyllabusOpen(false);
@@ -444,19 +521,68 @@ export default function Learn() {
 
   const showToast = (message) => {
     setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const handleCompleteLesson = () => {
-    setNodes((nds) => nds.map((n) => (n.id === activeLesson.id ? { ...n, data: { ...n.data, status: 'completed' } } : n)));
+  // --- PASS TEST & UNLOCK NEXT MODULE HANDLER ---
+  const handlePassTestAndUnlockNext = () => {
+    const currentIndex = nodes.findIndex((n) => n.id === activeLesson.id);
+    let nextUnlockedLabel = null;
+
+    const updatedNodes = nodes.map((node, idx) => {
+      if (node.id === activeLesson.id) {
+        return { ...node, data: { ...node.data, status: 'completed' } };
+      }
+      // Unlock NEXT node if it is locked!
+      if (idx === currentIndex + 1 && node.data.status === 'locked') {
+        nextUnlockedLabel = node.data.label;
+        return { ...node, data: { ...node.data, status: 'active' } };
+      }
+      return node;
+    });
+
+    // Update connector edges to solid blue animation
+    const updatedEdges = edges.map((edge) => {
+      if (edge.source === activeLesson.id) {
+        return { ...edge, animated: true, style: { stroke: '#3b82f6', strokeWidth: 3 } };
+      }
+      return edge;
+    });
+
+    setNodes(updatedNodes);
+    setEdges(updatedEdges);
     setActiveLesson((prev) => ({ ...prev, data: { ...prev.data, status: 'completed' } }));
-    showToast("+ 50 XP Earned! Module Completed.");
+
+    if (nextUnlockedLabel) {
+      showToast(`🏆 TEST PASSED! +50 XP Earned. Unlocked Next Module: "${nextUnlockedLabel}"!`);
+    } else {
+      showToast("🏆 TEST PASSED! +50 XP Earned. Roadmap Mastered!");
+    }
   };
 
   const handleUndoComplete = () => {
     setNodes((nds) => nds.map((n) => (n.id === activeLesson.id ? { ...n, data: { ...n.data, status: 'active' } } : n)));
     setActiveLesson((prev) => ({ ...prev, data: { ...prev.data, status: 'active' } }));
     showToast("Progress reverted. XP removed.");
+  };
+
+  const handleVerifyQuizAnswer = () => {
+    if (selectedAnswerIndex === null) {
+      showToast("Please select an answer option first!");
+      return;
+    }
+
+    const testQ = activeLesson?.data?.testQuestion || { correctIndex: 1 };
+    const isCorrect = Number(selectedAnswerIndex) === Number(testQ.correctIndex);
+
+    setQuizSubmitted(true);
+    setIsQuizCorrect(isCorrect);
+
+    if (isCorrect) {
+      handlePassTestAndUnlockNext();
+    } else {
+      showToast("❌ Incorrect answer. Review the lesson and try again!");
+    }
   };
 
   const styledNodes = nodes.map(node => {
@@ -526,9 +652,9 @@ export default function Learn() {
   const Toast = () => {
     if (!toastMessage) return null;
     return (
-      <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 bg-slate-900 dark:bg-slate-800 border dark:border-slate-700 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 z-50 text-xs sm:text-sm">
-        <Zap className="text-amber-400" size={18} />
-        <span className="font-bold">{toastMessage}</span>
+      <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 bg-slate-900 dark:bg-slate-800 border dark:border-slate-700 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 z-[250] text-xs sm:text-sm font-bold">
+        <Award className="text-amber-400 shrink-0" size={20} />
+        <span>{toastMessage}</span>
       </div>
     );
   };
@@ -536,7 +662,15 @@ export default function Learn() {
   const filteredCareerPaths = careerPaths.filter(path => path.title.toLowerCase().includes(searchQuery.toLowerCase()));
   const filteredSkillPaths = skillPaths.filter(path => path.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  // --- VIEW 3: CROSS-PLATFORM (MOBILE + DESKTOP) LESSON VIEWER ---
+  // Active Lesson Test Question Data
+  const currentTestQ = activeLesson?.data?.testQuestion || {
+    question: `What is the key takeaway of ${activeLesson?.data?.label || 'this module'}?`,
+    options: ['Core syntax & state', 'Memory leak prevention', 'Time complexity analysis', 'Production deployment'],
+    correctIndex: 0,
+    explanation: 'Understanding foundational concepts is crucial before advancing.'
+  };
+
+  // --- VIEW 3: CROSS-PLATFORM (MOBILE + DESKTOP) LESSON VIEWER WITH TEST CHALLENGE ---
   if (activeLesson) {
     return (
       <div className="fixed inset-0 z-[100] w-screen h-screen flex flex-col md:flex-row bg-white dark:bg-[#0d1117] animate-in fade-in overflow-hidden transition-colors duration-300">
@@ -558,7 +692,7 @@ export default function Learn() {
           </button>
         </div>
 
-        {/* Syllabus Sidebar (Desktop + Mobile Slide-over Drawer) */}
+        {/* Syllabus Sidebar */}
         <div className={`
           fixed md:relative inset-y-0 left-0 z-50 w-80 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22] flex flex-col shrink-0 transition-transform duration-300
           ${mobileSyllabusOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -609,9 +743,9 @@ export default function Learn() {
           </div>
         </div>
         
-        {/* Main Lesson Content Area */}
+        {/* Main Lesson Content & Assessment Test Area */}
         <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0d1117] transition-colors p-6 sm:p-12 lg:p-16">
-          <div className="max-w-4xl mx-auto space-y-8">
+          <div className="max-w-4xl mx-auto space-y-8 pb-12">
             
             <div className="border-b border-slate-100 dark:border-slate-800 pb-6 flex items-start justify-between">
               <div>
@@ -626,7 +760,7 @@ export default function Learn() {
                   onClick={() => handleOpenNodeEditor(activeLesson, false)}
                   className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all"
                 >
-                  <Edit3 size={14} /> Edit Content
+                  <Edit3 size={14} /> Edit Test & Content
                 </button>
               )}
             </div>
@@ -658,27 +792,115 @@ export default function Learn() {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-              {activeLesson.data.status === 'completed' ? (
-                <div className="flex items-center gap-4">
-                  <button onClick={handleUndoComplete} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-bold text-xs transition-colors underline">Undo Complete</button>
-                  <div className="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 text-xs"><CheckCircle size={16} /> Completed</div>
+            {/* --- INTERACTIVE MODULE ASSESSMENT TEST CHALLENGE --- */}
+            <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-slate-50 dark:bg-[#161b22] border-2 border-slate-200 dark:border-slate-800 space-y-6 shadow-lg">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-4">
+                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-xs uppercase tracking-wider">
+                  <HelpCircle size={18} /> Module {activeLesson.id} Verification Test • Pass to Unlock Next Module
                 </div>
-              ) : (
-                <button onClick={handleCompleteLesson} className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 sm:px-8 rounded-xl flex items-center gap-2 text-xs sm:text-sm transition-colors shadow-lg"><Check size={18} /> Mark as Completed</button>
+                <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-bold">
+                  +50 XP Reward
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                  {currentTestQ.question}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Select the correct answer below and click <span className="font-bold text-indigo-500">Submit Answer</span> to unlock the next module.
+                </p>
+              </div>
+
+              {/* Option Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {currentTestQ.options.map((option, idx) => {
+                  const isSelected = selectedAnswerIndex === idx;
+                  let cardStyle = "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200";
+
+                  if (quizSubmitted) {
+                    if (idx === currentTestQ.correctIndex) {
+                      cardStyle = "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-extrabold shadow-md";
+                    } else if (isSelected) {
+                      cardStyle = "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-extrabold";
+                    }
+                  } else if (isSelected) {
+                    cardStyle = "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 font-bold shadow-sm";
+                  }
+
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      disabled={activeLesson.data.status === 'completed' && isQuizCorrect}
+                      onClick={() => {
+                        setSelectedAnswerIndex(idx);
+                        setQuizSubmitted(false);
+                      }}
+                      className={`p-4 rounded-2xl border-2 text-left text-xs sm:text-sm font-semibold transition-all flex items-center justify-between ${cardStyle}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0">
+                          {String.fromCharCode(65 + idx)}
+                        </span>
+                        <span>{option}</span>
+                      </div>
+
+                      {quizSubmitted && idx === currentTestQ.correctIndex && (
+                        <CheckCircle size={18} className="text-emerald-500 shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Feedback Alert */}
+              {quizSubmitted && (
+                <div className={`p-4 rounded-2xl border text-xs font-bold flex items-center gap-2 ${
+                  isQuizCorrect
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 text-emerald-700 dark:text-emerald-400'
+                    : 'bg-rose-50 dark:bg-rose-900/20 border-rose-300 text-rose-700 dark:text-rose-400'
+                }`}>
+                  {isQuizCorrect ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                  <span>
+                    {isQuizCorrect 
+                      ? `🎉 Correct! ${currentTestQ.explanation}` 
+                      : `❌ Incorrect. Review the code example above and try again!`}
+                  </span>
+                </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                {activeLesson.data.status === 'completed' ? (
+                  <div className="flex items-center gap-4">
+                    <button onClick={handleUndoComplete} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-bold text-xs transition-colors underline">Undo Complete</button>
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 text-xs">
+                      <CheckCircle size={16} /> Module Passed & Unlocked
+                    </div>
+                  </div>
+                ) : (
+                  <button 
+                    type="button"
+                    onClick={handleVerifyQuizAnswer}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 sm:px-8 rounded-xl flex items-center gap-2 text-xs sm:text-sm transition-colors shadow-lg ml-auto"
+                  >
+                    <Check size={18} /> Submit Answer & Pass Test
+                  </button>
+                )}
+              </div>
             </div>
 
           </div>
         </div>
 
-        {/* Node & Content Editor Modal */}
+        {/* Admin Node & Content Editor Modal */}
         {nodeEditorModal.isOpen && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-            <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 lg:p-8 shadow-2xl space-y-6">
+            <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 lg:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-wider">
-                  <ShieldCheck size={18} /> Admin Console • {nodeEditorModal.isNew ? 'Add New Node' : 'Edit Node'}
+                  <ShieldCheck size={18} /> Admin Console • {nodeEditorModal.isNew ? 'Add New Node' : 'Edit Node & Test Challenge'}
                 </div>
                 <button
                   onClick={() => setNodeEditorModal({ isOpen: false, node: null, isNew: false })}
@@ -745,7 +967,7 @@ export default function Learn() {
                     Lesson Explanation / Overview
                   </label>
                   <textarea
-                    rows={3}
+                    rows={2}
                     value={nodeFormData.overview}
                     onChange={(e) => setNodeFormData({ ...nodeFormData, overview: e.target.value })}
                     placeholder="Enter detailed lesson content and explanation..."
@@ -754,17 +976,66 @@ export default function Learn() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                    Code Example Snippet
+                {/* TEST QUESTION EDITOR */}
+                <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <label className="block text-xs font-bold text-indigo-500 uppercase tracking-wider flex items-center gap-1">
+                    <HelpCircle size={14} /> Verification Test Question & Choices
                   </label>
-                  <textarea
-                    rows={3}
-                    value={nodeFormData.codeSnippet}
-                    onChange={(e) => setNodeFormData({ ...nodeFormData, codeSnippet: e.target.value })}
-                    placeholder="Enter code snippet example..."
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-emerald-400 font-mono text-xs focus:outline-none focus:border-indigo-500"
+                  
+                  <input
+                    type="text"
+                    value={nodeFormData.question}
+                    onChange={(e) => setNodeFormData({ ...nodeFormData, question: e.target.value })}
+                    placeholder="Test Question..."
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
                   />
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={nodeFormData.optionA}
+                      onChange={(e) => setNodeFormData({ ...nodeFormData, optionA: e.target.value })}
+                      placeholder="Option A"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={nodeFormData.optionB}
+                      onChange={(e) => setNodeFormData({ ...nodeFormData, optionB: e.target.value })}
+                      placeholder="Option B"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={nodeFormData.optionC}
+                      onChange={(e) => setNodeFormData({ ...nodeFormData, optionC: e.target.value })}
+                      placeholder="Option C"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={nodeFormData.optionD}
+                      onChange={(e) => setNodeFormData({ ...nodeFormData, optionD: e.target.value })}
+                      placeholder="Option D"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Correct Answer Index (0 = A, 1 = B, 2 = C, 3 = D)
+                    </label>
+                    <select
+                      value={nodeFormData.correctIndex}
+                      onChange={(e) => setNodeFormData({ ...nodeFormData, correctIndex: Number(e.target.value) })}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
+                    >
+                      <option value={0}>Option A is Correct</option>
+                      <option value={1}>Option B is Correct</option>
+                      <option value={2}>Option C is Correct</option>
+                      <option value={3}>Option D is Correct</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 gap-3">
@@ -790,7 +1061,7 @@ export default function Learn() {
                       type="submit"
                       className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg transition-colors flex items-center gap-2"
                     >
-                      <Save size={14} /> Save Graph & Content
+                      <Save size={14} /> Save Graph & Test
                     </button>
                   </div>
                 </div>
@@ -910,7 +1181,7 @@ export default function Learn() {
         )}
       </div>
 
-      {/* DESKTOP 2D CANVAS GRAPH VIEW (Hidden on Mobile) */}
+      {/* DESKTOP 2D CANVAS GRAPH VIEW */}
       <div className="hidden md:block flex-1 w-full relative">
         <ReactFlow 
           nodes={styledNodes} 
@@ -936,11 +1207,11 @@ export default function Learn() {
         </ReactFlow>
       </div>
 
-      {/* MOBILE RESPONSIVE STEP-BY-STEP SYLLABUS TIMELINE (Shown on Mobile) */}
+      {/* MOBILE RESPONSIVE STEP-BY-STEP SYLLABUS TIMELINE */}
       <div className="md:hidden flex-1 overflow-y-auto px-4 py-6 space-y-4">
         <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center gap-2">
           <BookOpen size={16} className="shrink-0" />
-          <span>Tap any module below to open the lesson & start learning!</span>
+          <span>Tap any module to view lesson & pass verification test to unlock next!</span>
         </div>
 
         <div className="space-y-3 relative pl-4 border-l-2 border-slate-200 dark:border-slate-800">
@@ -968,14 +1239,14 @@ export default function Learn() {
                   <div>
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">{node.data.label}</h3>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                      {node.data.overview || 'Tap to view lesson content'}
+                      {node.data.overview || 'Tap to view lesson & test'}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {node.data.status === 'completed' && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] uppercase">Done</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] uppercase">Passed</span>
                   )}
                   {node.data.status === 'active' && (
                     <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-[10px] uppercase">Active</span>
@@ -990,133 +1261,6 @@ export default function Learn() {
           ))}
         </div>
       </div>
-
-      {/* Node & Content Editor Modal */}
-      {nodeEditorModal.isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 lg:p-8 shadow-2xl space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-wider">
-                <ShieldCheck size={18} /> Admin Console • {nodeEditorModal.isNew ? 'Add New Node & Link' : 'Edit Node, Content & Connections'}
-              </div>
-              <button
-                onClick={() => setNodeEditorModal({ isOpen: false, node: null, isNew: false })}
-                className="p-1.5 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveNode} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  Node Title / Label
-                </label>
-                <input
-                  type="text"
-                  value={nodeFormData.label}
-                  onChange={(e) => setNodeFormData({ ...nodeFormData, label: e.target.value })}
-                  placeholder="Enter node title (e.g. Async / Await)..."
-                  required
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <Link2 size={14} /> Connect From Parent Node
-                  </label>
-                  <select
-                    value={nodeFormData.parentId}
-                    onChange={(e) => setNodeFormData({ ...nodeFormData, parentId: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value="">(No Parent Connection)</option>
-                    {nodes
-                      .filter((n) => !nodeEditorModal.node || n.id !== nodeEditorModal.node.id)
-                      .map((n) => (
-                        <option key={n.id} value={n.id}>
-                          Node {n.id}: {n.data.label}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                    Node Status
-                  </label>
-                  <select
-                    value={nodeFormData.status}
-                    onChange={(e) => setNodeFormData({ ...nodeFormData, status: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value="active">Active (Unlocked)</option>
-                    <option value="completed">Completed</option>
-                    <option value="locked">Locked</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  Lesson Explanation / Overview
-                </label>
-                <textarea
-                  rows={3}
-                  value={nodeFormData.overview}
-                  onChange={(e) => setNodeFormData({ ...nodeFormData, overview: e.target.value })}
-                  placeholder="Enter detailed lesson content and explanation..."
-                  required
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  Code Example Snippet
-                </label>
-                <textarea
-                  rows={3}
-                  value={nodeFormData.codeSnippet}
-                  onChange={(e) => setNodeFormData({ ...nodeFormData, codeSnippet: e.target.value })}
-                  placeholder="Enter code snippet example..."
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-emerald-400 font-mono text-xs focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 gap-3">
-                {!nodeEditorModal.isNew && nodeEditorModal.node && (
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteNode(nodeEditorModal.node.id)}
-                    className="px-4 py-2.5 rounded-xl bg-rose-600/10 border border-rose-500/30 text-rose-500 font-bold text-xs hover:bg-rose-500/20 transition-all flex items-center gap-1.5"
-                  >
-                    <Trash2 size={14} /> Delete Node
-                  </button>
-                )}
-
-                <div className="flex items-center gap-3 ml-auto">
-                  <button
-                    type="button"
-                    onClick={() => setNodeEditorModal({ isOpen: false, node: null, isNew: false })}
-                    className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg transition-colors flex items-center gap-2"
-                  >
-                    <Save size={14} /> Save Graph & Content
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
