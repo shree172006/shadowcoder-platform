@@ -5,11 +5,10 @@ import 'reactflow/dist/style.css';
 import { 
   BookOpen, Code2, Database, Terminal, ArrowLeft, CheckCircle, Lock, 
   Play, Plus, Layout, Server, PieChart, Layers, FileJson, Check, Zap, Search,
-  ShieldCheck, Edit3, Trash2, Save, X, Link2, Move, Menu, ChevronRight, HelpCircle, AlertCircle, Award
+  ShieldCheck, Edit3, Trash2, Save, X, Link2, Move, Menu, ChevronRight, HelpCircle, AlertCircle, Award, Globe, Cpu, Wrench
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AdminConsoleModal from '../../components/AdminConsoleModal.jsx';
-import { apiClient } from '../../lib/apiClient.js';
 
 // --- ICON RENDER HELPER ---
 const renderTopicIcon = (icon) => {
@@ -46,1220 +45,441 @@ const renderTopicIcon = (icon) => {
   }
 };
 
-// --- INITIAL DEFAULT DATA ---
+// --- INITIAL DEFAULT CAREER TRACKS ---
 const INITIAL_CAREER_PATHS = [
-  { id: 'frontend', title: 'Frontend Developer', icon: 'frontend', modules: 24, completed: 0 },
-  { id: 'backend', title: 'Backend Developer', icon: 'backend', modules: 28, completed: 5 },
-  { id: 'data-analytics', title: 'Data Analytics', icon: 'data-analytics', modules: 18, completed: 0 },
-  { id: 'fullstack', title: 'Full Stack Engineer', icon: 'fullstack', modules: 42, completed: 12 },
+  { id: 'frontend', title: 'Frontend Developer', icon: 'frontend', modules: 9, completed: 3 },
+  { id: 'backend', title: 'Backend Developer', icon: 'backend', modules: 8, completed: 2 },
+  { id: 'fullstack', title: 'Full Stack Engineer', icon: 'fullstack', modules: 12, completed: 4 },
+  { id: 'data-analytics', title: 'Data Analyst', icon: 'data-analytics', modules: 7, completed: 1 },
 ];
 
-const INITIAL_SKILL_PATHS = [
-  { id: 'python', title: 'Python', icon: 'python', modules: 12, completed: 12 },
-  { id: 'react', title: 'React', icon: 'react', modules: 8, completed: 4 },
-  { id: 'sql', title: 'SQL / Databases', icon: 'sql', modules: 5, completed: 5 },
-  { id: 'html-css', title: 'HTML & CSS', icon: 'html-css', modules: 10, completed: 10 },
-  { id: 'javascript', title: 'JavaScript', icon: 'javascript', modules: 15, completed: 8 },
-];
-
-const INITIAL_NODES = [
+// --- DETAILED ROADMAP.SH FRONTEND NODES ---
+const FRONTEND_ROADMAP_NODES = [
   { 
-    id: '1', 
-    position: { x: 350, y: 50 }, 
+    id: 'fe-1', 
+    position: { x: 350, y: 40 }, 
     data: { 
-      label: 'Variables & Types', 
+      label: '1. Internet & Web Protocols', 
       status: 'completed',
-      overview: 'Master variable declarations (const, let, var), primitive data types, type coercion, and memory allocation in JavaScript/Python.',
-      codeSnippet: `// Variables & Types Overview\nconst name = "ShadowCoder Engineer";\nlet xp = 450;\ntypeof xp; // "number"`,
+      category: 'Foundation',
+      overview: 'Understand how the Internet works, HTTP/HTTPS request-response cycles, DNS resolution, IP routing, and browser rendering engines.',
+      codeSnippet: `// HTTP GET Request Header Example\nGET /api/v1/users HTTP/1.1\nHost: shadowcoder-app.web.app\nAccept: application/json`,
+      tools: ['DNS', 'HTTP/2', 'Chrome DevTools Network Tab'],
       testQuestion: {
-        question: 'Which keyword declares a variable that CANNOT be reassigned in JavaScript?',
-        options: ['let', 'var', 'const', 'static'],
-        correctIndex: 2,
-        explanation: 'The `const` keyword creates a read-only reference to a value, preventing reassignment.'
+        question: 'Which network protocol translates human-readable domain names (e.g. shadowcoder.app) into IP addresses?',
+        options: ['HTTP', 'DNS (Domain Name System)', 'FTP', 'SMTP'],
+        correctIndex: 1,
+        explanation: 'DNS maps domain names to numeric IP addresses required for network routing.'
       }
-    }, 
-    type: 'default' 
+    } 
   },
   { 
-    id: '2', 
+    id: 'fe-2', 
     position: { x: 350, y: 150 }, 
     data: { 
-      label: 'Control Flow', 
+      label: '2. HTML5 & Semantic Web', 
       status: 'completed',
-      overview: 'Understand execution branch logic using if-else statements, switch cases, ternary operators, and loop iterations.',
-      codeSnippet: `// Control Flow Example\nif (xp > 400) {\n  console.log("Level Up Unlocked!");\n}`,
+      overview: 'Master semantic element structures (<header>, <main>, <article>), form validation, ARIA accessibility standards, and SEO tags.',
+      codeSnippet: `<!-- Semantic HTML5 & Accessibility Example -->\n<header role="banner">\n  <nav aria-label="Main Navigation">\n    <a href="/dashboard">Dashboard</a>\n  </nav>\n</header>`,
+      tools: ['W3C Validator', 'Lighthouse Accessibility Audit'],
       testQuestion: {
-        question: 'Which loop is guaranteed to execute its code block AT LEAST ONCE before evaluating the condition?',
-        options: ['for loop', 'while loop', 'do...while loop', 'for...in loop'],
-        correctIndex: 2,
-        explanation: 'A `do...while` loop executes its body once before checking the condition.'
+        question: 'Which semantic HTML5 tag should be used for the primary self-contained content of a document?',
+        options: ['<div>', '<main>', '<section>', '<article>'],
+        correctIndex: 1,
+        explanation: '<main> represents the dominant, unique content of the body of the document.'
       }
     } 
   },
   { 
-    id: '3', 
-    position: { x: 350, y: 250 }, 
+    id: 'fe-3', 
+    position: { x: 350, y: 260 }, 
     data: { 
-      label: 'Data Structures', 
+      label: '3. CSS3 & Modern Layouts', 
+      status: 'completed',
+      overview: 'Master the CSS Box Model, Flexbox alignment, CSS Grid 2D layouts, Media Queries, CSS Custom Properties (Variables), and responsive breakpoints.',
+      codeSnippet: `/* Modern CSS Grid & Flexbox Layout */\n.dashboard-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));\n  gap: 1.5rem;\n}`,
+      tools: ['Flexbox Playground', 'CSS Grid Inspector', 'Tailwind CSS'],
+      testQuestion: {
+        question: 'Which CSS Grid property specifies equal column sizing that automatically wraps items?',
+        options: ['flex-direction: column', 'grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))', 'position: absolute', 'float: left'],
+        correctIndex: 1,
+        explanation: 'repeat(auto-fit, minmax(...)) dynamically creates responsive grid column tracks.'
+      }
+    } 
+  },
+  { 
+    id: 'fe-4', 
+    position: { x: 350, y: 370 }, 
+    data: { 
+      label: '4. JavaScript ES6+ & DOM', 
       status: 'active',
-      overview: 'Explore arrays, hash maps, sets, queues, and tree traversals for efficient memory & time complexity.',
-      codeSnippet: `// Hash Map Example\nconst cache = new Map();\ncache.set("user_101", { name: "Elena" });`,
+      overview: 'Deep dive into DOM events, Fetch API, Async/Await, ES6 modules, Closures, Prototypes, and the JavaScript Event Loop looper.',
+      codeSnippet: `// Async/Await Fetch API Example\nasync function fetchDashboardStats() {\n  const res = await fetch('/api/stats');\n  const data = await res.json();\n  return data;\n}`,
+      tools: ['Chrome V8 Engine', 'JS Event Loop Visualizer'],
       testQuestion: {
-        question: 'What is the average time complexity of a key lookup in a Hash Map (Map)?',
-        options: ['O(N)', 'O(1)', 'O(N log N)', 'O(N^2)'],
+        question: 'What is the primary role of the JavaScript Event Loop?',
+        options: ['To compile JS to C++', 'To handle asynchronous callbacks by offloading tasks to Web APIs and checking the Call Stack', 'To execute SQL queries', 'To minify CSS files'],
         correctIndex: 1,
-        explanation: 'Hash maps provide constant O(1) time complexity for key lookups on average.'
+        explanation: 'The Event Loop monitors the Call Stack and Callback Queue to execute async code.'
       }
     } 
   },
   { 
-    id: '4', 
-    position: { x: 150, y: 350 }, 
+    id: 'fe-5', 
+    position: { x: 180, y: 480 }, 
     data: { 
-      label: 'OOP Basics', 
+      label: '5. Version Control & Git', 
       status: 'locked',
-      overview: 'Encapsulation, inheritance, polymorphism, and class constructors.',
-      codeSnippet: `class Developer {\n  constructor(name) { this.name = name; }\n}`,
+      overview: 'Master Git CLI branching workflows, merge conflict resolution, rebase, and GitHub pull requests.',
+      codeSnippet: `# Git Feature Branch Workflow\ngit checkout -b feature/auth-flow\ngit commit -m "feat: add Google OAuth login"\ngit push origin feature/auth-flow`,
+      tools: ['Git CLI', 'GitHub', 'GitLab'],
       testQuestion: {
-        question: 'Which OOP concept allows a child class to inherit properties and methods from a parent class?',
-        options: ['Abstraction', 'Polymorphism', 'Inheritance', 'Encapsulation'],
-        correctIndex: 2,
-        explanation: 'Inheritance allows a subclass to reuse properties and methods of a superclass.'
-      }
-    } 
-  },
-  { 
-    id: '5', 
-    position: { x: 550, y: 350 }, 
-    data: { 
-      label: 'Functional Programming', 
-      status: 'locked',
-      overview: 'Pure functions, immutability, higher-order functions (map, filter, reduce), and function composition.',
-      codeSnippet: `const doubleXp = (xpList) => xpList.map(x => x * 2);`,
-      testQuestion: {
-        question: 'What defines a Pure Function in functional programming?',
-        options: ['It mutates global state', 'It produces side effects', 'Given the same inputs, it always returns the same output without side effects', 'It requires an async keyword'],
-        correctIndex: 2,
-        explanation: 'Pure functions are deterministic and cause zero side effects.'
-      }
-    } 
-  },
-  { 
-    id: '6', 
-    position: { x: 350, y: 450 }, 
-    data: { 
-      label: 'Final Project', 
-      status: 'locked',
-      overview: 'Build a production-ready asynchronous job simulation microservice.',
-      codeSnippet: `// Final Project Execution\nconsole.log("Deploying Production Microservice...");`,
-      testQuestion: {
-        question: 'Which HTTP status code signifies a successful resource creation?',
-        options: ['200 OK', '201 Created', '404 Not Found', '500 Internal Error'],
+        question: 'Which Git command creates and immediately switches to a new branch?',
+        options: ['git branch <name>', 'git checkout -b <name>', 'git merge <name>', 'git push'],
         correctIndex: 1,
-        explanation: '201 Created indicates successful creation of a new resource.'
+        explanation: '`git checkout -b` creates a new branch and switches HEAD to it.'
+      }
+    } 
+  },
+  { 
+    id: 'fe-6', 
+    position: { x: 520, y: 480 }, 
+    data: { 
+      label: '6. Build Tools & Vite', 
+      status: 'locked',
+      overview: 'Explore module bundlers (Vite, Webpack), static asset optimization, ESLint code quality rules, and Prettier auto-formatting.',
+      codeSnippet: `// vite.config.js Optimization\nexport default defineConfig({\n  build: { cssCodeSplit: true, minify: 'terser' }\n});`,
+      tools: ['Vite', 'Webpack', 'ESLint', 'Prettier'],
+      testQuestion: {
+        question: 'Why is Vite faster than Webpack for local development hot module replacement (HMR)?',
+        options: ['Vite uses Python under the hood', 'Vite leverages native browser ES Modules (ESM) without bundling everything up front', 'Vite disables CSS', 'Vite requires no Node.js'],
+        correctIndex: 1,
+        explanation: 'Vite serves source code over native ESM, bundling only on demand.'
+      }
+    } 
+  },
+  { 
+    id: 'fe-7', 
+    position: { x: 350, y: 590 }, 
+    data: { 
+      label: '7. React.js & State Management', 
+      status: 'locked',
+      overview: 'Master React JSX, Component Lifecycle, Hooks (useState, useEffect, useMemo, useCallback), Context API, and Zustand / Redux Toolkit.',
+      codeSnippet: `// Custom React Hook Example\nfunction useWindowWidth() {\n  const [width, setWidth] = useState(window.innerWidth);\n  useEffect(() => {\n    const handleResize = () => setWidth(window.innerWidth);\n    window.addEventListener('resize', handleResize);\n    return () => window.removeEventListener('resize', handleResize);\n  }, []);\n  return width;\n}`,
+      tools: ['React DevTools', 'Redux Toolkit', 'Zustand'],
+      testQuestion: {
+        question: 'Which React Hook is used to memoize expensive calculation values between re-renders?',
+        options: ['useState', 'useMemo', 'useEffect', 'useRef'],
+        correctIndex: 1,
+        explanation: '`useMemo` caches the result of a calculation between renders.'
+      }
+    } 
+  },
+  { 
+    id: 'fe-8', 
+    position: { x: 180, y: 700 }, 
+    data: { 
+      label: '8. Testing (Jest & Cypress)', 
+      status: 'locked',
+      overview: 'Unit testing with Jest & React Testing Library, integration testing, and End-to-End (E2E) browser testing with Cypress.',
+      codeSnippet: `// React Testing Library Example\ntest('renders login button', () => {\n  render(<AuthPage />);\n  expect(screen.getByText('Sign In')).toBeInTheDocument();\n});`,
+      tools: ['Jest', 'React Testing Library', 'Cypress'],
+      testQuestion: {
+        question: 'What is the core philosophy of React Testing Library?',
+        options: ['Test internal component state implementation details', 'The more your tests resemble the way your software is used, the more confidence they give you', 'Test CSS line heights', 'Disable user events'],
+        correctIndex: 1,
+        explanation: 'React Testing Library focuses on user-centric testing rather than internal implementation details.'
+      }
+    } 
+  },
+  { 
+    id: 'fe-9', 
+    position: { x: 520, y: 700 }, 
+    data: { 
+      label: '9. Next.js, SSR & Web Vitals', 
+      status: 'locked',
+      overview: 'TypeScript integration, Server-Side Rendering (SSR), Static Site Generation (SSG), App Router, and Core Web Vitals (LCP, CLS, INP) performance.',
+      codeSnippet: `// Next.js App Router Server Component\nexport default async function Page() {\n  const data = await fetch('https://api.example.com/items', { cache: 'force-cache' });\n  const items = await data.json();\n  return <ItemList items={items} />;\n}`,
+      tools: ['TypeScript', 'Next.js App Router', 'Google PageSpeed / Web Vitals'],
+      testQuestion: {
+        question: 'In Web Vitals performance metrics, what does LCP stand for?',
+        options: ['Largest Contentful Paint', 'Low Contrast Palette', 'Log Code Protocol', 'Local Cache Process'],
+        correctIndex: 0,
+        explanation: 'LCP (Largest Contentful Paint) measures render time of the largest content element visible in the viewport.'
       }
     } 
   },
 ];
 
 const INITIAL_EDGES = [
-  { id: 'e1-2', source: '1', target: '2', type: 'smoothstep', style: { stroke: '#000', strokeWidth: 3 } },
-  { id: 'e2-3', source: '2', target: '3', type: 'smoothstep', animated: true, style: { stroke: '#3b82f6', strokeWidth: 3 } }, 
-  { id: 'e3-4', source: '3', target: '4', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
-  { id: 'e3-5', source: '3', target: '5', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
-  { id: 'e4-6', source: '4', target: '6', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
-  { id: 'e5-6', source: '5', target: '6', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
+  { id: 'e1-2', source: 'fe-1', target: 'fe-2', type: 'smoothstep', style: { stroke: '#10b981', strokeWidth: 3 } },
+  { id: 'e2-3', source: 'fe-2', target: 'fe-3', type: 'smoothstep', style: { stroke: '#10b981', strokeWidth: 3 } }, 
+  { id: 'e3-4', source: 'fe-3', target: 'fe-4', type: 'smoothstep', animated: true, style: { stroke: '#3b82f6', strokeWidth: 3 } },
+  { id: 'e4-5', source: 'fe-4', target: 'fe-5', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
+  { id: 'e4-6', source: 'fe-4', target: 'fe-6', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
+  { id: 'e5-7', source: 'fe-5', target: 'fe-7', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
+  { id: 'e6-7', source: 'fe-6', target: 'fe-7', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
+  { id: 'e7-8', source: 'fe-7', target: 'fe-8', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
+  { id: 'e7-9', source: 'fe-7', target: 'fe-9', type: 'smoothstep', style: { stroke: '#94a3b8', strokeWidth: 3, strokeDasharray: '5,5' } },
 ];
 
 export default function Learn() {
   const { isAdmin } = useAuth();
-  const [selectedTopic, setSelectedTopic] = useState(null);
-  const [activeLesson, setActiveLesson] = useState(null);
+  const [selectedTopic, setSelectedTopic] = useState('frontend');
+  const [activeLesson, setActiveLesson] = useState(FRONTEND_ROADMAP_NODES[3]); // Default active JS node
   const [toastMessage, setToastMessage] = useState(null);
   const [searchQuery, setSearchQuery] = useState(''); 
-  const [mobileSyllabusOpen, setMobileSyllabusOpen] = useState(false);
+  const [nodes, setNodes] = useState(FRONTEND_ROADMAP_NODES);
+  const [edges, setEdges] = useState(INITIAL_EDGES);
 
   // Quiz State for Active Lesson
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
 
-  // Reset quiz state when activeLesson changes
   useEffect(() => {
     setSelectedAnswerIndex(null);
     setQuizSubmitted(false);
     setIsQuizCorrect(false);
   }, [activeLesson]);
 
-  // Persistent States
-  const [careerPaths, setCareerPaths] = useState(() => {
-    try {
-      const saved = localStorage.getItem('shadowcoder_career_paths');
-      return saved ? JSON.parse(saved) : INITIAL_CAREER_PATHS;
-    } catch (e) {
-      return INITIAL_CAREER_PATHS;
-    }
-  });
+  const handleQuizSubmit = () => {
+    if (selectedAnswerIndex === null || !activeLesson?.data?.testQuestion) return;
 
-  const [skillPaths, setSkillPaths] = useState(() => {
-    try {
-      const saved = localStorage.getItem('shadowcoder_skill_paths');
-      return saved ? JSON.parse(saved) : INITIAL_SKILL_PATHS;
-    } catch (e) {
-      return INITIAL_SKILL_PATHS;
-    }
-  });
+    const correct = selectedAnswerIndex === activeLesson.data.testQuestion.correctIndex;
+    setIsQuizCorrect(correct);
+    setQuizSubmitted(true);
 
-  const [nodes, setNodes] = useState(() => {
-    try {
-      const saved = localStorage.getItem('shadowcoder_learn_nodes');
-      return saved ? JSON.parse(saved) : INITIAL_NODES;
-    } catch (e) {
-      return INITIAL_NODES;
-    }
-  });
+    if (correct) {
+      // Auto-Unlock Next Roadmap Node
+      const currentIndex = nodes.findIndex(n => n.id === activeLesson.id);
+      
+      setNodes(prevNodes => prevNodes.map((n, idx) => {
+        if (n.id === activeLesson.id) {
+          return { ...n, data: { ...n.data, status: 'completed' } };
+        }
+        if (idx === currentIndex + 1 && n.data.status === 'locked') {
+          return { ...n, data: { ...n.data, status: 'active' } };
+        }
+        return n;
+      }));
 
-  const [edges, setEdges] = useState(() => {
-    try {
-      const saved = localStorage.getItem('shadowcoder_learn_edges');
-      return saved ? JSON.parse(saved) : INITIAL_EDGES;
-    } catch (e) {
-      return INITIAL_EDGES;
-    }
-  });
-
-  // Save changes to localStorage automatically
-  useEffect(() => {
-    localStorage.setItem('shadowcoder_career_paths', JSON.stringify(careerPaths));
-  }, [careerPaths]);
-
-  useEffect(() => {
-    localStorage.setItem('shadowcoder_skill_paths', JSON.stringify(skillPaths));
-  }, [skillPaths]);
-
-  useEffect(() => {
-    localStorage.setItem('shadowcoder_learn_nodes', JSON.stringify(nodes));
-  }, [nodes]);
-
-  useEffect(() => {
-    localStorage.setItem('shadowcoder_learn_edges', JSON.stringify(edges));
-  }, [edges]);
-
-  // Sync with MongoDB backend API
-  const syncWithBackend = async (updatedNodes, updatedEdges) => {
-    try {
-      if (selectedTopic) {
-        await apiClient(`/learn/${selectedTopic.id || 'default'}`, {
-          method: 'PUT',
-          body: {
-            title: selectedTopic.title,
-            nodes: updatedNodes || nodes,
-            edges: updatedEdges || edges,
-          },
-        });
-      }
-    } catch (err) {
-      console.warn('Backend sync warning:', err.message);
-    }
-  };
-
-  // Admin Roadmaps Modal State
-  const [modalConfig, setModalConfig] = useState({
-    isOpen: false,
-    action: 'add',
-    item: null,
-  });
-
-  // Admin Node & Content Editor Modal State
-  const [nodeEditorModal, setNodeEditorModal] = useState({
-    isOpen: false,
-    node: null,
-    isNew: false,
-  });
-
-  const [nodeFormData, setNodeFormData] = useState({
-    label: '',
-    status: 'active',
-    parentId: '',
-    overview: '',
-    codeSnippet: '',
-    question: '',
-    optionA: '',
-    optionB: '',
-    optionC: '',
-    optionD: '',
-    correctIndex: 0,
-  });
-
-  const handleOpenNodeEditor = (node = null, isNew = false) => {
-    if (node) {
-      const parentEdge = edges.find((e) => e.target === node.id);
-      const q = node.data?.testQuestion || {};
-      setNodeFormData({
-        label: node.data?.label || '',
-        status: node.data?.status || 'active',
-        parentId: parentEdge ? parentEdge.source : '',
-        overview: node.data?.overview || 'Module overview content...',
-        codeSnippet: node.data?.codeSnippet || '// Code example',
-        question: q.question || 'Enter test question...',
-        optionA: q.options?.[0] || 'Option 1',
-        optionB: q.options?.[1] || 'Option 2',
-        optionC: q.options?.[2] || 'Option 3',
-        optionD: q.options?.[3] || 'Option 4',
-        correctIndex: q.correctIndex || 0,
-      });
+      setToastMessage(`🎉 Correct! Node Passed & Next Roadmap Step Unlocked! (+50 XP)`);
     } else {
-      const lastNode = nodes[nodes.length - 1];
-      setNodeFormData({
-        label: 'New Learning Module',
-        status: 'active',
-        parentId: lastNode ? lastNode.id : '',
-        overview: 'Write lesson explanation and requirements here...',
-        codeSnippet: '// Write code example here',
-        question: 'Enter test question...',
-        optionA: 'Option 1',
-        optionB: 'Option 2',
-        optionC: 'Option 3',
-        optionD: 'Option 4',
-        correctIndex: 0,
-      });
-    }
-    setNodeEditorModal({ isOpen: true, node, isNew });
-  };
-
-  const handleSaveNode = async (e) => {
-    e.preventDefault();
-    let updatedNodes = [...nodes];
-    let updatedEdges = [...edges];
-
-    const testQuestionObj = {
-      question: nodeFormData.question,
-      options: [nodeFormData.optionA, nodeFormData.optionB, nodeFormData.optionC, nodeFormData.optionD],
-      correctIndex: Number(nodeFormData.correctIndex),
-      explanation: 'Correct answer selected based on module concept.',
-    };
-
-    if (nodeEditorModal.isNew) {
-      const newNodeId = `${Date.now()}`;
-      const parentNode = nodes.find((n) => n.id === nodeFormData.parentId);
-      const newX = parentNode ? parentNode.position.x : 350;
-      const newY = parentNode ? parentNode.position.y + 120 : (nodes.length * 100 + 50);
-
-      const newNode = {
-        id: newNodeId,
-        position: { x: newX, y: newY },
-        data: {
-          label: nodeFormData.label,
-          status: nodeFormData.status,
-          overview: nodeFormData.overview,
-          codeSnippet: nodeFormData.codeSnippet,
-          testQuestion: testQuestionObj,
-        },
-      };
-
-      updatedNodes = [...nodes, newNode];
-
-      if (nodeFormData.parentId) {
-        updatedEdges = [
-          ...edges,
-          {
-            id: `e${nodeFormData.parentId}-${newNodeId}`,
-            source: nodeFormData.parentId,
-            target: newNodeId,
-            type: 'smoothstep',
-            style: { stroke: '#3b82f6', strokeWidth: 3 },
-          },
-        ];
-      }
-
-      setNodes(updatedNodes);
-      setEdges(updatedEdges);
-      showToast("New Node & Test Challenge Created!");
-    } else if (nodeEditorModal.node) {
-      const targetId = nodeEditorModal.node.id;
-
-      updatedNodes = nodes.map((n) =>
-        n.id === targetId
-          ? {
-              ...n,
-              data: {
-                ...n.data,
-                label: nodeFormData.label,
-                status: nodeFormData.status,
-                overview: nodeFormData.overview,
-                codeSnippet: nodeFormData.codeSnippet,
-                testQuestion: testQuestionObj,
-              },
-            }
-          : n
-      );
-
-      const filtered = edges.filter((e) => e.target !== targetId);
-      if (nodeFormData.parentId) {
-        updatedEdges = [
-          ...filtered,
-          {
-            id: `e${nodeFormData.parentId}-${targetId}`,
-            source: nodeFormData.parentId,
-            target: targetId,
-            type: 'smoothstep',
-            style: { stroke: '#3b82f6', strokeWidth: 3 },
-          },
-        ];
-      } else {
-        updatedEdges = filtered;
-      }
-
-      setNodes(updatedNodes);
-      setEdges(updatedEdges);
-
-      if (activeLesson && activeLesson.id === targetId) {
-        setActiveLesson({
-          ...activeLesson,
-          data: {
-            ...activeLesson.data,
-            label: nodeFormData.label,
-            status: nodeFormData.status,
-            overview: nodeFormData.overview,
-            codeSnippet: nodeFormData.codeSnippet,
-            testQuestion: testQuestionObj,
-          },
-        });
-      }
-      showToast("Node Content & Verification Test Saved!");
+      setToastMessage(`❌ Incorrect. Review the module overview and try again.`);
     }
 
-    await syncWithBackend(updatedNodes, updatedEdges);
-    setNodeEditorModal({ isOpen: false, node: null, isNew: false });
-  };
-
-  const handleDeleteNode = async (nodeId) => {
-    if (window.confirm("Are you sure you want to delete this node and its connections?")) {
-      const updatedNodes = nodes.filter((n) => n.id !== nodeId);
-      const updatedEdges = edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
-
-      setNodes(updatedNodes);
-      setEdges(updatedEdges);
-
-      if (activeLesson?.id === nodeId) {
-        setActiveLesson(null);
-      }
-      setNodeEditorModal({ isOpen: false, node: null, isNew: false });
-      await syncWithBackend(updatedNodes, updatedEdges);
-      showToast("Node deleted.");
-    }
-  };
-
-  const handleOpenAdminModal = (action, item = null) => {
-    setModalConfig({
-      isOpen: true,
-      action,
-      item,
-    });
-  };
-
-  const handleAdminSave = ({ action, data, item, id }) => {
-    if (action === 'delete') {
-      setCareerPaths((prev) => prev.filter((p) => p.id !== id));
-      setSkillPaths((prev) => prev.filter((p) => p.id !== id));
-      showToast("Roadmap topic deleted.");
-    } else if (action === 'add') {
-      const newTopic = {
-        id: `topic-${Date.now()}`,
-        title: data.title,
-        icon: 'book',
-        modules: 10,
-        completed: 0,
-      };
-      setSkillPaths((prev) => [newTopic, ...prev]);
-      showToast("New Roadmap topic created.");
-    } else if (action === 'edit' && item) {
-      const updater = (list) =>
-        list.map((p) => (p.id === item.id ? { ...p, title: data.title } : p));
-      setCareerPaths(updater);
-      setSkillPaths(updater);
-      showToast("Roadmap title updated.");
-    }
-  };
-
-  const onNodesChange = useCallback((changes) => {
-    setNodes((nds) => {
-      const updated = applyNodeChanges(changes, nds);
-      localStorage.setItem('shadowcoder_learn_nodes', JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
-
-  const onEdgesChange = useCallback((changes) => {
-    setEdges((eds) => {
-      const updated = applyEdgeChanges(changes, eds);
-      localStorage.setItem('shadowcoder_learn_edges', JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
-
-  const onConnect = useCallback(
-    (params) => {
-      setEdges((eds) => {
-        const updated = addEdge({ ...params, type: 'smoothstep', style: { stroke: '#3b82f6', strokeWidth: 3 } }, eds);
-        localStorage.setItem('shadowcoder_learn_edges', JSON.stringify(updated));
-        return updated;
-      });
-      showToast("Nodes Connected!");
-    },
-    []
-  );
-
-  const handleNodeClick = (event, node) => {
-    if (node.data.status === 'locked' && !isAdmin) {
-      showToast("This module is locked. Pass previous module test to unlock!");
-    } else {
-      setActiveLesson(node);
-      setMobileSyllabusOpen(false);
-    }
-  };
-
-  const showToast = (message) => {
-    setToastMessage(message);
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // --- PASS TEST & UNLOCK NEXT MODULE HANDLER ---
-  const handlePassTestAndUnlockNext = () => {
-    const currentIndex = nodes.findIndex((n) => n.id === activeLesson.id);
-    let nextUnlockedLabel = null;
-
-    const updatedNodes = nodes.map((node, idx) => {
-      if (node.id === activeLesson.id) {
-        return { ...node, data: { ...node.data, status: 'completed' } };
-      }
-      // Unlock NEXT node if it is locked!
-      if (idx === currentIndex + 1 && node.data.status === 'locked') {
-        nextUnlockedLabel = node.data.label;
-        return { ...node, data: { ...node.data, status: 'active' } };
-      }
-      return node;
-    });
-
-    // Update connector edges to solid blue animation
-    const updatedEdges = edges.map((edge) => {
-      if (edge.source === activeLesson.id) {
-        return { ...edge, animated: true, style: { stroke: '#3b82f6', strokeWidth: 3 } };
-      }
-      return edge;
-    });
-
-    setNodes(updatedNodes);
-    setEdges(updatedEdges);
-    setActiveLesson((prev) => ({ ...prev, data: { ...prev.data, status: 'completed' } }));
-
-    if (nextUnlockedLabel) {
-      showToast(`🏆 TEST PASSED! +50 XP Earned. Unlocked Next Module: "${nextUnlockedLabel}"!`);
-    } else {
-      showToast("🏆 TEST PASSED! +50 XP Earned. Roadmap Mastered!");
-    }
-  };
-
-  const handleUndoComplete = () => {
-    setNodes((nds) => nds.map((n) => (n.id === activeLesson.id ? { ...n, data: { ...n.data, status: 'active' } } : n)));
-    setActiveLesson((prev) => ({ ...prev, data: { ...prev.data, status: 'active' } }));
-    showToast("Progress reverted. XP removed.");
-  };
-
-  const handleVerifyQuizAnswer = () => {
-    if (selectedAnswerIndex === null) {
-      showToast("Please select an answer option first!");
-      return;
-    }
-
-    const testQ = activeLesson?.data?.testQuestion || { correctIndex: 1 };
-    const isCorrect = Number(selectedAnswerIndex) === Number(testQ.correctIndex);
-
-    setQuizSubmitted(true);
-    setIsQuizCorrect(isCorrect);
-
-    if (isCorrect) {
-      handlePassTestAndUnlockNext();
-    } else {
-      showToast("❌ Incorrect answer. Review the lesson and try again!");
-    }
-  };
-
-  const styledNodes = nodes.map(node => {
-    let nodeClass = "font-black text-sm uppercase tracking-wide px-6 py-3 rounded-lg min-w-[180px] text-center border-[3px] transition-colors shadow-md ";
-    
-    if (node.data.status === 'completed') {
-      nodeClass += "bg-[#bef264] text-[#0f172a] border-[#0f172a] shadow-[4px_4px_0px_0px_#0f172a]";
-    } else if (node.data.status === 'active') {
-      nodeClass += "bg-[#facc15] text-[#0f172a] border-[#0f172a] shadow-[4px_4px_0px_0px_#0f172a]";
-    } else {
-      nodeClass += "bg-slate-50 dark:bg-[#1e293b] text-slate-500 dark:text-slate-400 border-dashed border-slate-300 dark:border-slate-700";
-    }
-
-    return {
-      ...node,
-      className: nodeClass,
-      data: {
-        ...node.data,
-        label: (
-          <div className="flex items-center justify-center gap-2">
-            {node.data.status === 'completed' && <CheckCircle size={18} className="text-[#0f172a]" />}
-            {node.data.status === 'active' && <Play size={18} className="text-[#0f172a] fill-[#0f172a]" />}
-            {node.data.status === 'locked' && <Lock size={18} className="text-slate-400 dark:text-slate-500" />}
-            {node.data.label}
-          </div>
-        )
-      }
-    };
-  });
-
-  const RoadmapCard = ({ item }) => (
-    <div onClick={() => setSelectedTopic(item)} className="bg-white dark:bg-[#161b22] border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(59,130,246,0.5)] hover:border-slate-900 dark:hover:border-blue-500 cursor-pointer transition-all group relative">
-      <div className="flex items-center justify-between mb-6">
-        <div className="bg-slate-50 dark:bg-[#0d1117] w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700 group-hover:scale-110 transition-transform">
-          {renderTopicIcon(item.icon)}
-        </div>
-
-        {isAdmin && (
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => handleOpenAdminModal('edit', item)}
-              className="p-1 text-slate-500 hover:text-blue-500 transition-colors"
-              title="Edit Roadmap Topic"
-            >
-              <Edit3 size={14} />
-            </button>
-            <button
-              onClick={() => handleOpenAdminModal('delete', item)}
-              className="p-1 text-slate-500 hover:text-rose-500 transition-colors"
-              title="Delete Roadmap Topic"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        )}
-      </div>
-
-      <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">{item.title}</h2>
-      <div className="flex items-center gap-4 text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 transition-colors"><span className="flex items-center gap-1.5"><BookOpen size={16}/> {item.modules} Modules</span></div>
-      <div>
-        <div className="flex justify-between text-xs font-bold mb-2"><span className="text-slate-700 dark:text-slate-400 transition-colors">Progress</span><span className="text-blue-600 dark:text-blue-400">{Math.round((item.completed / item.modules) * 100)}%</span></div>
-        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 transition-colors"><div className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full" style={{ width: `${(item.completed / item.modules) * 100}%` }}></div></div>
-      </div>
-    </div>
-  );
-
-  const Toast = () => {
-    if (!toastMessage) return null;
-    return (
-      <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 bg-slate-900 dark:bg-slate-800 border dark:border-slate-700 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 z-[250] text-xs sm:text-sm font-bold">
-        <Award className="text-amber-400 shrink-0" size={20} />
-        <span>{toastMessage}</span>
-      </div>
-    );
-  };
-
-  const filteredCareerPaths = careerPaths.filter(path => path.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredSkillPaths = skillPaths.filter(path => path.title.toLowerCase().includes(searchQuery.toLowerCase()));
-
-  // Active Lesson Test Question Data
-  const currentTestQ = activeLesson?.data?.testQuestion || {
-    question: `What is the key takeaway of ${activeLesson?.data?.label || 'this module'}?`,
-    options: ['Core syntax & state', 'Memory leak prevention', 'Time complexity analysis', 'Production deployment'],
-    correctIndex: 0,
-    explanation: 'Understanding foundational concepts is crucial before advancing.'
-  };
-
-  // --- VIEW 3: CROSS-PLATFORM (MOBILE + DESKTOP) LESSON VIEWER WITH TEST CHALLENGE ---
-  if (activeLesson) {
-    return (
-      <div className="fixed inset-0 z-[100] w-screen h-screen flex flex-col md:flex-row bg-white dark:bg-[#0d1117] animate-in fade-in overflow-hidden transition-colors duration-300">
-        <Toast /> 
-        
-        {/* Mobile Header Bar */}
-        <div className="md:hidden h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#161b22] px-4 flex items-center justify-between shrink-0">
-          <button onClick={() => setActiveLesson(null)} className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-bold text-xs">
-            <ArrowLeft size={16} /> Roadmap
-          </button>
-          <span className="font-black text-slate-900 dark:text-white text-xs truncate max-w-[180px]">
-            {activeLesson.data.label}
-          </span>
-          <button
-            onClick={() => setMobileSyllabusOpen(!mobileSyllabusOpen)}
-            className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
-          >
-            <Menu size={18} />
-          </button>
-        </div>
-
-        {/* Syllabus Sidebar */}
-        <div className={`
-          fixed md:relative inset-y-0 left-0 z-50 w-80 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161b22] flex flex-col shrink-0 transition-transform duration-300
-          ${mobileSyllabusOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        `}>
-          <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#161b22] transition-colors flex items-center justify-between">
-            <div>
-              <button onClick={() => setActiveLesson(null)} className="hidden md:flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold transition-colors text-xs mb-3">
-                <ArrowLeft size={14} /> Back to Roadmap
-              </button>
-              <h3 className="font-black text-slate-900 dark:text-white text-base leading-tight">
-                {selectedTopic?.title || 'Roadmap'} Syllabus
-              </h3>
-            </div>
-
-            <button onClick={() => setMobileSyllabusOpen(false)} className="md:hidden p-1 text-slate-400">
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {nodes.map((n) => (
-              <div key={n.id} className="group relative flex items-center gap-1">
-                <button 
-                  onClick={() => handleNodeClick(null, n)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl text-left text-xs font-bold transition-colors ${
-                    activeLesson.id === n.id ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 shadow-sm' : 
-                    n.data.status === 'locked' ? 'text-slate-400 dark:text-slate-600 cursor-not-allowed' : 
-                    'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  {n.data.status === 'completed' && <CheckCircle size={16} className="text-emerald-500 shrink-0" />}
-                  {n.data.status === 'active' && <Play size={16} className="text-amber-500 shrink-0" />}
-                  {n.data.status === 'locked' && <Lock size={16} className="text-slate-300 dark:text-slate-600 shrink-0" />}
-                  <span className="truncate">{n.data.label}</span>
-                </button>
-
-                {isAdmin && (
-                  <button
-                    onClick={() => handleOpenNodeEditor(n, false)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-500 transition-all shrink-0"
-                    title="Edit Node Content"
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        {/* Main Lesson Content & Assessment Test Area */}
-        <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0d1117] transition-colors p-6 sm:p-12 lg:p-16">
-          <div className="max-w-4xl mx-auto space-y-8 pb-12">
-            
-            <div className="border-b border-slate-100 dark:border-slate-800 pb-6 flex items-start justify-between">
-              <div>
-                <span className="text-blue-600 dark:text-blue-400 font-black text-xs tracking-widest uppercase mb-2 flex items-center gap-2">
-                  <BookOpen size={14}/> Module {activeLesson.id}
-                </span>
-                <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">{activeLesson.data.label}</h1>
-              </div>
-
-              {isAdmin && (
-                <button
-                  onClick={() => handleOpenNodeEditor(activeLesson, false)}
-                  className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all"
-                >
-                  <Edit3 size={14} /> Edit Test & Content
-                </button>
-              )}
-            </div>
-            
-            <div className="prose prose-slate dark:prose-invert prose-base sm:prose-lg max-w-none">
-              <p className="text-base sm:text-xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed mb-8">
-                {activeLesson.data.overview || `Welcome to the ${activeLesson.data.label} module. Here you will learn the core concepts required to master this topic.`}
-              </p>
-              
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-4">Code Example & Reference</h3>
-              
-              <div className="bg-[#0f172a] rounded-2xl p-4 sm:p-6 my-6 shadow-xl border border-slate-800">
-                <div className="flex items-center justify-between border-b border-slate-700/50 pb-3 mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                    </div>
-                    <span className="text-slate-400 text-xs ml-3 font-mono font-bold">example.js</span>
-                  </div>
-                </div>
-
-                <pre className="text-emerald-400 font-mono text-xs sm:text-sm overflow-x-auto m-0 p-0">
-                  <code>
-                    {activeLesson.data.codeSnippet || `// Example Implementation\nfunction initializeConcept(data) {\n  console.log("Ready to learn!");\n}`}
-                  </code>
-                </pre>
-              </div>
-            </div>
-
-            {/* --- INTERACTIVE MODULE ASSESSMENT TEST CHALLENGE --- */}
-            <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-slate-50 dark:bg-[#161b22] border-2 border-slate-200 dark:border-slate-800 space-y-6 shadow-lg">
-              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-4">
-                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-xs uppercase tracking-wider">
-                  <HelpCircle size={18} /> Module {activeLesson.id} Verification Test • Pass to Unlock Next Module
-                </div>
-                <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-bold">
-                  +50 XP Reward
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-                  {currentTestQ.question}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Select the correct answer below and click <span className="font-bold text-indigo-500">Submit Answer</span> to unlock the next module.
-                </p>
-              </div>
-
-              {/* Option Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {currentTestQ.options.map((option, idx) => {
-                  const isSelected = selectedAnswerIndex === idx;
-                  let cardStyle = "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200";
-
-                  if (quizSubmitted) {
-                    if (idx === currentTestQ.correctIndex) {
-                      cardStyle = "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-extrabold shadow-md";
-                    } else if (isSelected) {
-                      cardStyle = "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-extrabold";
-                    }
-                  } else if (isSelected) {
-                    cardStyle = "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 font-bold shadow-sm";
-                  }
-
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      disabled={activeLesson.data.status === 'completed' && isQuizCorrect}
-                      onClick={() => {
-                        setSelectedAnswerIndex(idx);
-                        setQuizSubmitted(false);
-                      }}
-                      className={`p-4 rounded-2xl border-2 text-left text-xs sm:text-sm font-semibold transition-all flex items-center justify-between ${cardStyle}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0">
-                          {String.fromCharCode(65 + idx)}
-                        </span>
-                        <span>{option}</span>
-                      </div>
-
-                      {quizSubmitted && idx === currentTestQ.correctIndex && (
-                        <CheckCircle size={18} className="text-emerald-500 shrink-0" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Feedback Alert */}
-              {quizSubmitted && (
-                <div className={`p-4 rounded-2xl border text-xs font-bold flex items-center gap-2 ${
-                  isQuizCorrect
-                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 text-emerald-700 dark:text-emerald-400'
-                    : 'bg-rose-50 dark:bg-rose-900/20 border-rose-300 text-rose-700 dark:text-rose-400'
-                }`}>
-                  {isQuizCorrect ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
-                  <span>
-                    {isQuizCorrect 
-                      ? `🎉 Correct! ${currentTestQ.explanation}` 
-                      : `❌ Incorrect. Review the code example above and try again!`}
-                  </span>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                {activeLesson.data.status === 'completed' ? (
-                  <div className="flex items-center gap-4">
-                    <button onClick={handleUndoComplete} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-bold text-xs transition-colors underline">Undo Complete</button>
-                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 text-xs">
-                      <CheckCircle size={16} /> Module Passed & Unlocked
-                    </div>
-                  </div>
-                ) : (
-                  <button 
-                    type="button"
-                    onClick={handleVerifyQuizAnswer}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 sm:px-8 rounded-xl flex items-center gap-2 text-xs sm:text-sm transition-colors shadow-lg ml-auto"
-                  >
-                    <Check size={18} /> Submit Answer & Pass Test
-                  </button>
-                )}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Admin Node & Content Editor Modal */}
-        {nodeEditorModal.isOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-            <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 lg:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-wider">
-                  <ShieldCheck size={18} /> Admin Console • {nodeEditorModal.isNew ? 'Add New Node' : 'Edit Node & Test Challenge'}
-                </div>
-                <button
-                  onClick={() => setNodeEditorModal({ isOpen: false, node: null, isNew: false })}
-                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <form onSubmit={handleSaveNode} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                    Node Title / Label
-                  </label>
-                  <input
-                    type="text"
-                    value={nodeFormData.label}
-                    onChange={(e) => setNodeFormData({ ...nodeFormData, label: e.target.value })}
-                    placeholder="Enter node title (e.g. Async / Await)..."
-                    required
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1">
-                      <Link2 size={14} /> Connect From Parent Node
-                    </label>
-                    <select
-                      value={nodeFormData.parentId}
-                      onChange={(e) => setNodeFormData({ ...nodeFormData, parentId: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-indigo-500"
-                    >
-                      <option value="">(No Parent Connection)</option>
-                      {nodes
-                        .filter((n) => !nodeEditorModal.node || n.id !== nodeEditorModal.node.id)
-                        .map((n) => (
-                          <option key={n.id} value={n.id}>
-                            Node {n.id}: {n.data.label}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                      Node Status
-                    </label>
-                    <select
-                      value={nodeFormData.status}
-                      onChange={(e) => setNodeFormData({ ...nodeFormData, status: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-indigo-500"
-                    >
-                      <option value="active">Active (Unlocked)</option>
-                      <option value="completed">Completed</option>
-                      <option value="locked">Locked</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                    Lesson Explanation / Overview
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={nodeFormData.overview}
-                    onChange={(e) => setNodeFormData({ ...nodeFormData, overview: e.target.value })}
-                    placeholder="Enter detailed lesson content and explanation..."
-                    required
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                {/* TEST QUESTION EDITOR */}
-                <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <label className="block text-xs font-bold text-indigo-500 uppercase tracking-wider flex items-center gap-1">
-                    <HelpCircle size={14} /> Verification Test Question & Choices
-                  </label>
-                  
-                  <input
-                    type="text"
-                    value={nodeFormData.question}
-                    onChange={(e) => setNodeFormData({ ...nodeFormData, question: e.target.value })}
-                    placeholder="Test Question..."
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
-                  />
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      value={nodeFormData.optionA}
-                      onChange={(e) => setNodeFormData({ ...nodeFormData, optionA: e.target.value })}
-                      placeholder="Option A"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
-                    />
-                    <input
-                      type="text"
-                      value={nodeFormData.optionB}
-                      onChange={(e) => setNodeFormData({ ...nodeFormData, optionB: e.target.value })}
-                      placeholder="Option B"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
-                    />
-                    <input
-                      type="text"
-                      value={nodeFormData.optionC}
-                      onChange={(e) => setNodeFormData({ ...nodeFormData, optionC: e.target.value })}
-                      placeholder="Option C"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
-                    />
-                    <input
-                      type="text"
-                      value={nodeFormData.optionD}
-                      onChange={(e) => setNodeFormData({ ...nodeFormData, optionD: e.target.value })}
-                      placeholder="Option D"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                      Correct Answer Index (0 = A, 1 = B, 2 = C, 3 = D)
-                    </label>
-                    <select
-                      value={nodeFormData.correctIndex}
-                      onChange={(e) => setNodeFormData({ ...nodeFormData, correctIndex: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 text-xs"
-                    >
-                      <option value={0}>Option A is Correct</option>
-                      <option value={1}>Option B is Correct</option>
-                      <option value={2}>Option C is Correct</option>
-                      <option value={3}>Option D is Correct</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 gap-3">
-                  {!nodeEditorModal.isNew && nodeEditorModal.node && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteNode(nodeEditorModal.node.id)}
-                      className="px-4 py-2.5 rounded-xl bg-rose-600/10 border border-rose-500/30 text-rose-500 font-bold text-xs hover:bg-rose-500/20 transition-all flex items-center gap-1.5"
-                    >
-                      <Trash2 size={14} /> Delete Node
-                    </button>
-                  )}
-
-                  <div className="flex items-center gap-3 ml-auto">
-                    <button
-                      type="button"
-                      onClick={() => setNodeEditorModal({ isOpen: false, node: null, isNew: false })}
-                      className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg transition-colors flex items-center gap-2"
-                    >
-                      <Save size={14} /> Save Graph & Test
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // --- VIEW 1: CATEGORIZED ROADMAP GRID ---
-  if (!selectedTopic) {
-    return (
-      <div className="py-8 animate-in fade-in max-w-7xl mx-auto px-4 transition-colors duration-300">
-        
-        {/* Admin Action Bar */}
-        {isAdmin && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
-              <ShieldCheck size={18} /> Admin Console Active • Developer Roadmaps Control
-            </div>
-            <button
-              onClick={() => handleOpenAdminModal('add')}
-              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all hover:scale-105"
-            >
-              <Plus size={16} /> Add New Learn Topic
-            </button>
-          </div>
-        )}
-
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Developer Roadmaps</h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2 text-base sm:text-lg transition-colors">Step-by-step guides and paths to learn tools or a complete role.</p>
-        </div>
-
-        <div className="mb-10 relative max-w-2xl">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="text-slate-400 dark:text-slate-500" size={20} />
-          </div>
-          <input
-            type="text"
-            placeholder="Search for a role or skill (e.g., Frontend, Python)..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-[#161b22] border-2 border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-blue-600 text-sm font-bold text-slate-800 dark:text-slate-200 shadow-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
-          />
-        </div>
-
-        {filteredCareerPaths.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6"><h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white transition-colors">Role-Based Roadmaps</h2><div className="h-px bg-slate-200 dark:bg-slate-800 flex-1 ml-4 transition-colors"></div></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {filteredCareerPaths.map((path) => <RoadmapCard key={path.id} item={path} />)}
-            </div>
-          </div>
-        )}
-
-        {filteredSkillPaths.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6"><h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white transition-colors">Skill-Based Roadmaps</h2><div className="h-px bg-slate-200 dark:bg-slate-800 flex-1 ml-4 transition-colors"></div></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {filteredSkillPaths.map((path) => <RoadmapCard key={path.id} item={path} />)}
-            </div>
-          </div>
-        )}
-
-        {filteredCareerPaths.length === 0 && filteredSkillPaths.length === 0 && (
-          <div className="text-center py-16 px-4 bg-slate-50 dark:bg-[#161b22] border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl transition-colors">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No roadmaps found</h3>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">We couldn't find anything matching "{searchQuery}". Try a different term.</p>
-          </div>
-        )}
-
-        {/* Admin Console Modal */}
-        <AdminConsoleModal
-          isOpen={modalConfig.isOpen}
-          onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
-          type="learn"
-          action={modalConfig.action}
-          item={modalConfig.item}
-          onSave={handleAdminSave}
-        />
-      </div>
-    );
-  }
-
-  // --- VIEW 2: CROSS-PLATFORM ROADMAP SYLLABUS & GRAPH ---
   return (
-    <div className="fixed inset-0 z-[100] w-screen h-screen bg-[#f8fafc] dark:bg-[#0d1117] animate-in fade-in flex flex-col pt-4 sm:pt-8 overflow-hidden transition-colors duration-300">
-      <Toast /> 
+    <div className="py-8 max-w-7xl mx-auto px-4 animate-in fade-in transition-colors duration-300 select-none">
       
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 relative z-10 px-4 sm:px-6 w-full shrink-0">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[100] px-5 py-3 rounded-2xl bg-slate-900 border-2 border-indigo-500 text-white font-bold text-xs shadow-2xl animate-in slide-in-from-bottom-4 flex items-center gap-2">
+          <Zap size={16} className="text-amber-400 fill-amber-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <button onClick={() => setSelectedTopic(null)} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold transition-colors mb-2 text-xs sm:text-sm">
-            <ArrowLeft size={16} /> Back to Roadmaps
-          </button>
-          <div className="flex items-center gap-3">
-            {renderTopicIcon(selectedTopic.icon)}
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white transition-colors">{selectedTopic.title}</h1>
-          </div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+            <BookOpen className="text-indigo-600 dark:text-indigo-400" /> Official Developer Roadmaps
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm">
+            Interactive, step-by-step career learning paths with module verification tests.
+          </p>
         </div>
 
-        {isAdmin && (
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
-              <Move size={14} /> Drag nodes to reposition • Draw lines to connect
-            </div>
+        {/* Track Selector */}
+        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+          {INITIAL_CAREER_PATHS.map((track) => (
             <button
-              onClick={() => handleOpenNodeEditor(null, true)}
-              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all hover:scale-105"
-            >
-              <Plus size={16} /> Add Node & Connection
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* DESKTOP 2D CANVAS GRAPH VIEW */}
-      <div className="hidden md:block flex-1 w-full relative">
-        <ReactFlow 
-          nodes={styledNodes} 
-          edges={edges} 
-          onNodesChange={onNodesChange} 
-          onEdgesChange={onEdgesChange} 
-          onConnect={onConnect} 
-          onNodeClick={handleNodeClick}
-          panOnScroll={true} 
-          panOnDrag={true} 
-          zoomOnScroll={true} 
-          zoomOnPinch={true} 
-          zoomOnDoubleClick={true}
-          nodesDraggable={isAdmin} 
-          nodesConnectable={isAdmin} 
-          elementsSelectable={true}
-          fitView 
-          fitViewOptions={{ padding: 0.3 }} 
-          proOptions={{ hideAttribution: true }} 
-        >
-          <Background color="#94a3b8" gap={30} size={1.5} />
-          <Controls className="!bg-white dark:!bg-slate-900 !border-slate-200 dark:!border-slate-800 !text-slate-900 dark:!text-white !rounded-xl" />
-        </ReactFlow>
-      </div>
-
-      {/* MOBILE RESPONSIVE STEP-BY-STEP SYLLABUS TIMELINE */}
-      <div className="md:hidden flex-1 overflow-y-auto px-4 py-6 space-y-4">
-        <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center gap-2">
-          <BookOpen size={16} className="shrink-0" />
-          <span>Tap any module to view lesson & pass verification test to unlock next!</span>
-        </div>
-
-        <div className="space-y-3 relative pl-4 border-l-2 border-slate-200 dark:border-slate-800">
-          {nodes.map((node, index) => (
-            <div
-              key={node.id}
-              onClick={(e) => handleNodeClick(e, node)}
-              className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative ${
-                node.data.status === 'completed'
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500/50 text-slate-900 dark:text-white'
-                  : node.data.status === 'active'
-                  ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-500/50 text-slate-900 dark:text-white'
-                  : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500'
+              key={track.id}
+              onClick={() => setSelectedTopic(track.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                selectedTopic === track.id
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-white'
               }`}
             >
-              {/* Bullet Node Indicator */}
-              <div className={`absolute -left-[25px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 bg-white dark:bg-slate-900 ${
-                node.data.status === 'completed' ? 'border-emerald-500 bg-emerald-500' :
-                node.data.status === 'active' ? 'border-amber-500 bg-amber-500' : 'border-slate-300 dark:border-slate-700'
-              }`} />
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-black font-mono text-slate-400">#{index + 1}</span>
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">{node.data.label}</h3>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                      {node.data.overview || 'Tap to view lesson & test'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {node.data.status === 'completed' && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] uppercase">Passed</span>
-                  )}
-                  {node.data.status === 'active' && (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-[10px] uppercase">Active</span>
-                  )}
-                  {node.data.status === 'locked' && (
-                    <Lock size={14} className="text-slate-400" />
-                  )}
-                  <ChevronRight size={16} className="text-slate-400" />
-                </div>
-              </div>
-            </div>
+              {track.title}
+            </button>
           ))}
         </div>
+      </div>
+
+      {/* MAIN DUAL PANE ROADMAP WORKSPACE */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* LEFT 7 COLS: Interactive Roadmap Tree Visualizer */}
+        <div className="lg:col-span-7 bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Globe size={18} className="text-indigo-500" /> Roadmap.sh Official Frontend Path
+            </h2>
+            <span className="text-xs text-slate-400 font-mono font-bold">9 Sequential Milestones</span>
+          </div>
+
+          {/* Interactive Node Timeline Checklist */}
+          <div className="space-y-4">
+            {nodes.map((node, index) => {
+              const isCompleted = node.data.status === 'completed';
+              const isActive = node.data.status === 'active' || activeLesson?.id === node.id;
+              const isLocked = node.data.status === 'locked';
+
+              return (
+                <div
+                  key={node.id}
+                  onClick={() => !isLocked && setActiveLesson(node)}
+                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                    isActive
+                      ? 'bg-indigo-50 dark:bg-indigo-600/10 border-indigo-500 shadow-md scale-[1.01]'
+                      : isCompleted
+                      ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-500/40 hover:border-emerald-500'
+                      : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 opacity-60'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                      isCompleted ? 'bg-emerald-500 text-white' :
+                      isActive ? 'bg-indigo-600 text-white animate-pulse' :
+                      'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                    }`}>
+                      {isCompleted ? <Check size={18} /> : isLocked ? <Lock size={16} /> : index + 1}
+                    </div>
+
+                    <div>
+                      <h3 className={`text-sm font-bold ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-white'}`}>
+                        {node.data.label}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{node.data.overview}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                      isCompleted ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
+                      isActive ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' :
+                      'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    }`}>
+                      {node.data.status}
+                    </span>
+                    <ChevronRight size={16} className="text-slate-400" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT 5 COLS: Active Module Lesson Drawer & Test Challenge */}
+        {activeLesson && (
+          <div className="lg:col-span-5 bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm sticky top-24">
+            
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div>
+                <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest block mb-1">Active Learning Node</span>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white">{activeLesson.data.label}</h3>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold">
+                +50 XP Node
+              </span>
+            </div>
+
+            {/* Overview */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <BookOpen size={14} className="text-indigo-400" /> Module Overview
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                {activeLesson.data.overview}
+              </p>
+            </div>
+
+            {/* Ecosystem Tools */}
+            {activeLesson.data.tools && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <Wrench size={14} className="text-amber-400" /> Tools & Ecosystem
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {activeLesson.data.tools.map((t) => (
+                    <span key={t} className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Code Snippet Playbook */}
+            {activeLesson.data.codeSnippet && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <Code2 size={14} className="text-emerald-400" /> Playbook Code Example
+                </h4>
+                <div className="p-4 rounded-2xl bg-[#0d1117] border border-slate-800 font-mono text-xs text-emerald-400 overflow-x-auto shadow-inner">
+                  <pre>{activeLesson.data.codeSnippet}</pre>
+                </div>
+              </div>
+            )}
+
+            {/* Interactive Module Verification Test */}
+            {activeLesson.data.testQuestion && (
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-4 pt-4">
+                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-xs uppercase tracking-wider">
+                  <Award size={16} /> Module Verification Test Challenge
+                </div>
+
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
+                  {activeLesson.data.testQuestion.question}
+                </h4>
+
+                <div className="space-y-2">
+                  {activeLesson.data.testQuestion.options.map((opt, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => !quizSubmitted && setSelectedAnswerIndex(idx)}
+                      className={`w-full p-3 rounded-xl border text-left text-xs font-semibold transition-all flex items-center justify-between ${
+                        selectedAnswerIndex === idx
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-indigo-400'
+                      }`}
+                    >
+                      <span>{opt}</span>
+                      <span className="w-5 h-5 rounded-full border border-current flex items-center justify-center font-bold text-[10px]">
+                        {String.fromCharCode(65 + idx)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {!quizSubmitted ? (
+                  <button
+                    onClick={handleQuizSubmit}
+                    disabled={selectedAnswerIndex === null}
+                    className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all disabled:opacity-50"
+                  >
+                    Submit Test Answer
+                  </button>
+                ) : (
+                  <div className={`p-4 rounded-xl border text-xs leading-relaxed space-y-1 ${
+                    isQuizCorrect ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                  }`}>
+                    <p className="font-bold">{isQuizCorrect ? '✅ Verification Test Passed!' : '❌ Incorrect Answer'}</p>
+                    <p>{activeLesson.data.testQuestion.explanation}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+          </div>
+        )}
+
       </div>
     </div>
   );
