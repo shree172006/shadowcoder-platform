@@ -13,7 +13,7 @@ const GoogleIcon = () => (
 );
 
 /**
- * Animated Particle Canvas Background for 3D Cyberpunk Aesthetic
+ * Animated Particle Canvas Background for Cyberpunk Dark Aesthetic (Safely Guarded)
  */
 const ParticleCanvas = () => {
   const canvasRef = useRef(null);
@@ -22,18 +22,21 @@ const ParticleCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     let animationFrameId;
 
     const resize = () => {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
+      const parent = canvas.parentElement;
+      canvas.width = parent ? parent.clientWidth : window.innerWidth;
+      canvas.height = parent ? parent.clientHeight : window.innerHeight;
     };
     resize();
     window.addEventListener('resize', resize);
 
     const particles = Array.from({ length: 30 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
+      x: Math.random() * (canvas.width || 800),
+      y: Math.random() * (canvas.height || 600),
       radius: Math.random() * 2 + 1,
       dx: (Math.random() - 0.5) * 0.8,
       dy: (Math.random() - 0.5) * 0.8,
@@ -41,6 +44,7 @@ const ParticleCanvas = () => {
     }));
 
     const draw = () => {
+      if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p) => {
         p.x += p.dx;
@@ -62,7 +66,7 @@ const ParticleCanvas = () => {
     draw();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resize);
     };
   }, []);
@@ -119,17 +123,17 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#07090e] text-slate-100 flex items-center justify-center p-4 overflow-hidden select-none">
+    <div className="relative min-h-screen bg-[#07090e] dark:bg-[#07090e] text-slate-100 flex items-center justify-center p-4 overflow-hidden select-none">
       {/* Background Animated Glowing Orbs */}
       <div className="absolute top-1/4 left-10 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
       <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
       <ParticleCanvas />
 
       {/* Main Glassmorphism Auth Card */}
-      <div className="relative z-10 w-full max-w-5xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 transition-all duration-500">
+      <div className="relative z-10 w-full max-w-5xl bg-slate-900/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 transition-all duration-500">
         
         {/* Left Side: Hero Showcase */}
-        <div className="lg:col-span-6 p-8 lg:p-12 bg-gradient-to-br from-indigo-950/40 via-slate-900/80 to-purple-950/30 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800/80">
+        <div className="lg:col-span-6 p-8 lg:p-12 bg-gradient-to-br from-indigo-950/40 via-slate-900/80 to-purple-950/30 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-wider uppercase mb-6">
               <Sparkles size={14} className="animate-spin" /> Next-Gen Gamified Job Simulation
@@ -167,7 +171,7 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 pt-4 border-t border-slate-800/60">
+          <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 pt-4 border-t border-slate-800">
             <span className="flex items-center gap-1.5"><ShieldCheck size={16} className="text-emerald-400" /> HTTP-Only Security</span>
             <span>•</span>
             <span className="flex items-center gap-1.5"><Terminal size={16} className="text-indigo-400" /> 100+ Gamification Badges</span>
@@ -226,7 +230,7 @@ export default function AuthPage() {
                     onChange={handleChange}
                     placeholder="Alex Mercer"
                     required={isSignup}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                   />
                 </div>
               </div>
@@ -245,7 +249,7 @@ export default function AuthPage() {
                   onChange={handleChange}
                   placeholder="alex@shadowcoder.com"
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
               </div>
             </div>
@@ -264,7 +268,7 @@ export default function AuthPage() {
                   placeholder="••••••••••••"
                   required
                   minLength={8}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
               </div>
             </div>
@@ -278,7 +282,7 @@ export default function AuthPage() {
                   name="track"
                   value={formData.track}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 >
                   <option value="fullstack">Full Stack Engineer</option>
                   <option value="frontend">Frontend Specialist (React/Vite)</option>
