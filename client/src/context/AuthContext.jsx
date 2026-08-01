@@ -3,31 +3,17 @@ import { apiClient } from '../lib/apiClient';
 
 const AuthContext = createContext(null);
 
-const DEFAULT_MONARCH_USER = {
-  _id: 'usr_shreyas_monarch',
-  name: 'Shreyas Chavan',
-  email: 'chavanshreyas2006@gmail.com',
-  role: 'admin',
-  track: 'fullstack',
-  level: 99,
-  xp: 48500,
-  streak: { currentCount: 14, bestCount: 30 },
-  unlockedTiers: [1, 2, 3, 4, 5],
-};
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(DEFAULT_MONARCH_USER);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Restore user session on application load
   const fetchMe = useCallback(async () => {
     try {
       const data = await apiClient('/auth/me');
-      if (data && data.user) {
-        setUser(data.user);
-      }
+      setUser(data.user || null);
     } catch (err) {
-      // Keep default Monarch user profile
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -38,57 +24,31 @@ export function AuthProvider({ children }) {
   }, [fetchMe]);
 
   const register = useCallback(async ({ name, email, password, role, track }) => {
-    try {
-      const data = await apiClient('/auth/register', {
-        method: 'POST',
-        body: { name, email, password, role, track },
-      });
-      if (data && data.user) {
-        setUser(data.user);
-        return data.user;
-      }
-    } catch (err) {}
-    
-    const newUsr = {
-      _id: `usr_${Date.now()}`,
-      name: name || 'Developer',
-      email: email || 'dev@shadowcoder.com',
-      role: role || 'student',
-      track: track || 'fullstack',
-      level: 1,
-      xp: 100,
-      streak: { currentCount: 1, bestCount: 1 },
-      unlockedTiers: [1],
-    };
-    setUser(newUsr);
-    return newUsr;
+    const data = await apiClient('/auth/register', {
+      method: 'POST',
+      body: { name, email, password, role, track },
+    });
+    setUser(data.user);
+    return data.user;
   }, []);
 
   const login = useCallback(async (email, password) => {
-    try {
-      const data = await apiClient('/auth/login', {
-        method: 'POST',
-        body: { email, password },
-      });
-      if (data && data.user) {
-        setUser(data.user);
-        return data.user;
-      }
-    } catch (err) {}
-
-    const loggedUsr = {
-      ...DEFAULT_MONARCH_USER,
-      email: email || DEFAULT_MONARCH_USER.email,
-    };
-    setUser(loggedUsr);
-    return loggedUsr;
+    const data = await apiClient('/auth/login', {
+      method: 'POST',
+      body: { email, password },
+    });
+    setUser(data.user);
+    return data.user;
   }, []);
 
   const logout = useCallback(async () => {
     try {
       await apiClient('/auth/logout', { method: 'POST' });
-    } catch (err) {}
-    setUser(DEFAULT_MONARCH_USER);
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setUser(null);
+    }
   }, []);
 
   const triggerOAuth = useCallback((provider) => {
@@ -100,7 +60,7 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       loading,
-      isAuthenticated: true,
+      isAuthenticated: !!user,
       isAdmin: user?.role === 'admin',
       isStudent: user?.role === 'student',
       login,
