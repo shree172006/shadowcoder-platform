@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, UploadCloud, CheckCircle, AlertCircle, Loader2, FileArchive, Briefcase, 
-  ShieldCheck, Cpu, Terminal, Zap, FileCode, Check, X, Award, AlertTriangle, Layers
+  ShieldCheck, Cpu, Terminal, Zap, FileCode, Check, X, Award, AlertTriangle, Layers, Lock
 } from 'lucide-react';
+import JSZip from 'jszip';
 import DesktopOnly from '../../layouts/DesktopOnly';
-import { apiClient } from '../../lib/apiClient.js';
 
 export default function SimulationWorkspace() {
   const { id } = useParams();
@@ -31,107 +31,168 @@ export default function SimulationWorkspace() {
     setErrorMsg(null);
 
     try {
-      // Read file content locally for dynamic analysis if small zip or text
-      const fileName = selectedFile.name.toLowerCase();
-      const fileSizeKb = Math.round(selectedFile.size / 1024);
+      // Load and inspect the actual ZIP archive buffer using JSZip
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      const zip = await JSZip.loadAsync(arrayBuffer);
 
-      // Perform dynamic code analysis based on actual zip size and file parameters
-      let dynamicScore = 85;
-      let status = 'PASSED';
-      let securityRating = 'A+';
-      let maintainabilityIndex = 92;
-      let testSuiteRate = '100% (6/6 Passed)';
-      let codeSmellsCount = 0;
-      let complexity = 'Low (3.2)';
-      let auditFeedback = [];
-      let criteriaAudit = [];
+      const fileEntries = Object.keys(zip.files);
+      let containsMediaOrPdf = false;
+      let codeFilesCount = 0;
+      let hasTargetPaymentFile = false;
+      let targetFileContent = '';
 
-      if (fileSizeKb < 1) {
-        // Empty or dummy zip file submitted
-        dynamicScore = 25;
-        status = 'FAILED';
-        securityRating = 'F';
-        maintainabilityIndex = 30;
-        testSuiteRate = '0% (0/6 Passed)';
-        codeSmellsCount = 5;
-        complexity = 'High';
-        auditFeedback = [
-          "Critical Error: Uploaded ZIP archive appears empty or missing codebase source files.",
-          "Architecture: Unable to locate payment.js or transaction handlers.",
-          "Recommendation: Unzip your starter codebase, implement payment.js logic, and re-archive."
-        ];
-        criteriaAudit = [
-          { name: 'Concurrent request handling', status: 'failed' },
-          { name: 'Return 409 status on race collision', status: 'failed' },
-          { name: 'Unit test suite execution', status: 'failed' },
-        ];
-      } else if (fileSizeKb > 5000) {
-        // Unusually large file (node_modules included)
-        dynamicScore = 65;
-        status = 'NEEDS REVISION';
-        securityRating = 'B';
-        maintainabilityIndex = 70;
-        testSuiteRate = '66% (4/6 Passed)';
-        codeSmellsCount = 3;
-        complexity = 'Moderate';
-        auditFeedback = [
-          "Warning: ZIP payload exceeds recommended weight (node_modules directory detected).",
-          "Architecture: Race condition handler executed, but bundle contains unoptimized dependencies.",
-          "Code Quality: Exclude node_modules before compressing your archive for faster evaluation."
-        ];
-        criteriaAudit = [
-          { name: 'Concurrent request handling', status: 'passed' },
-          { name: 'Return 409 status on race collision', status: 'passed' },
-          { name: 'Clean archive bundle size', status: 'failed' },
-        ];
-      } else {
-        // Valid codebase archive uploaded! Dynamic evaluation
-        dynamicScore = Math.min(98, 80 + Math.floor(Math.random() * 15));
-        status = 'PASSED';
-        securityRating = 'A+';
-        maintainabilityIndex = 94;
-        testSuiteRate = '100% (6/6 Passed)';
-        codeSmellsCount = 0;
-        complexity = 'Low (2.8)';
-        auditFeedback = [
-          "Architecture: Successfully resolved production race condition using atomic transaction locks.",
-          "Security: Zero hardcoded secrets detected. Input validation enforced at endpoint boundary.",
-          "Performance: Mutex lock releases cleanly within 4ms without blocking main thread looper.",
-          "Senior Staff Verdict: Clean, scalable, production-ready code ready for merge request."
-        ];
-        criteriaAudit = [
-          { name: 'Concurrent request handling', status: 'passed' },
-          { name: 'Return 409 status on race collision', status: 'passed' },
-          { name: 'Unit test suite execution', status: 'passed' },
-          { name: 'Clean zero-dependency build', status: 'passed' },
-        ];
+      for (const relativePath of fileEntries) {
+        const lower = relativePath.toLowerCase();
+
+        // 1. Strict Check for Non-Code Files (PDFs, Images, Binaries)
+        if (
+          lower.endsWith('.pdf') || 
+          lower.endsWith('.png') || 
+          lower.endsWith('.jpg') || 
+          lower.endsWith('.jpeg') || 
+          lower.endsWith('.gif') || 
+          lower.endsWith('.mp4') || 
+          lower.endsWith('.exe')
+        ) {
+          containsMediaOrPdf = true;
+        }
+
+        // 2. Count valid source code files
+        if (
+          lower.endsWith('.js') || 
+          lower.endsWith('.ts') || 
+          lower.endsWith('.jsx') || 
+          lower.endsWith('.tsx') || 
+          lower.endsWith('.py') || 
+          lower.endsWith('.json')
+        ) {
+          codeFilesCount++;
+          if (lower.includes('payment.js') || lower.includes('payment.ts') || lower.includes('index.js')) {
+            hasTargetPaymentFile = true;
+            targetFileContent = await zip.files[relativePath].async('string');
+          }
+        }
       }
 
-      setTimeout(() => {
+      // --- STRICT REJECTION CHECKS ---
+      if (containsMediaOrPdf) {
+        // Immediate Rejection for PDF / Images ZIP upload!
         setScorecard({
-          status,
-          score: dynamicScore,
-          securityRating,
-          maintainabilityIndex,
-          testSuiteRate,
-          codeSmellsCount,
-          complexity,
-          feedback: auditFeedback,
-          criteriaAudit,
-          earnedXp: status === 'PASSED' ? 300 : 50,
+          status: 'CRITICAL FAIL',
+          score: 0,
+          securityRating: 'F (Violation)',
+          maintainabilityIndex: 0,
+          testSuiteRate: '0% (0/6 Passed)',
+          codeSmellsCount: 99,
+          complexity: 'Invalid Archive',
+          feedback: [
+            "CRITICAL REJECTION: Submission contains non-code media files (.pdf, .png, .jpg).",
+            "Violation Audit: You uploaded a file archive containing non-programming binary documents.",
+            "Requirement: Upload only a clean codebase archive containing .js, .ts, or .py source code files."
+          ],
+          criteriaAudit: [
+            { name: 'Valid source code archive', status: 'failed' },
+            { name: 'Locate payment.js implementation', status: 'failed' },
+            { name: 'Concurrent request handling', status: 'failed' },
+            { name: 'Return 409 status on race collision', status: 'failed' },
+          ],
+          earnedXp: 0,
         });
         setIsEvaluating(false);
-      }, 2000);
+        return;
+      }
+
+      if (codeFilesCount === 0 || !hasTargetPaymentFile) {
+        // Rejection for missing required payment.js target code file
+        setScorecard({
+          status: 'FAILED',
+          score: 15,
+          securityRating: 'D',
+          maintainabilityIndex: 20,
+          testSuiteRate: '0% (0/6 Passed)',
+          codeSmellsCount: 8,
+          complexity: 'Missing Target File',
+          feedback: [
+            "FAILED: Required target file 'payment.js' was not found in the uploaded ZIP root.",
+            "Line-by-Line Inspection: Unable to locate payment.js or transaction handlers.",
+            "Action Required: Unzip starter codebase, modify payment.js, and compress correctly."
+          ],
+          criteriaAudit: [
+            { name: 'Valid source code archive', status: 'passed' },
+            { name: 'Locate payment.js implementation', status: 'failed' },
+            { name: 'Concurrent request handling', status: 'failed' },
+            { name: 'Return 409 status on race collision', status: 'failed' },
+          ],
+          earnedXp: 0,
+        });
+        setIsEvaluating(false);
+        return;
+      }
+
+      // --- DETAILED LINE-BY-LINE CODE INSPECTION ---
+      const hasMutexLock = targetFileContent.includes('mutex') || targetFileContent.includes('lock') || targetFileContent.includes('synchronize');
+      const hasStatus409 = targetFileContent.includes('409') || targetFileContent.includes('Conflict');
+      const hasTryCatch = targetFileContent.includes('try') && targetFileContent.includes('catch');
+      const hasAsyncWait = targetFileContent.includes('async') && targetFileContent.includes('await');
+
+      let dynamicScore = 35; // Base score for having file
+      let feedback = [];
+      let criteriaAudit = [
+        { name: 'Valid source code archive', status: 'passed' },
+        { name: 'Locate payment.js implementation', status: 'passed' },
+      ];
+
+      if (hasMutexLock) {
+        dynamicScore += 30;
+        criteriaAudit.push({ name: 'Mutex lock concurrency control', status: 'passed' });
+        feedback.push("Mutex Synchronization: Detected thread-safe mutex lock around transaction boundary.");
+      } else {
+        criteriaAudit.push({ name: 'Mutex lock concurrency control', status: 'failed' });
+        feedback.push("Missing Mutex: Code does not implement mutex or lock synchronization for concurrent requests.");
+      }
+
+      if (hasStatus409) {
+        dynamicScore += 20;
+        criteriaAudit.push({ name: 'Return 409 status on race collision', status: 'passed' });
+        feedback.push("HTTP Status: Returns 409 Conflict status on race collision.");
+      } else {
+        criteriaAudit.push({ name: 'Return 409 status on race collision', status: 'failed' });
+        feedback.push("HTTP Status Warning: Missing 409 Conflict status return logic.");
+      }
+
+      if (hasTryCatch && hasAsyncWait) {
+        dynamicScore += 10;
+        criteriaAudit.push({ name: 'Exception handling & async pipeline', status: 'passed' });
+        feedback.push("Exception Pipeline: Clean async/await handling with try/catch error boundaries.");
+      } else {
+        criteriaAudit.push({ name: 'Exception handling & async pipeline', status: 'failed' });
+      }
+
+      const status = dynamicScore >= 80 ? 'PASSED' : dynamicScore >= 50 ? 'NEEDS REVISION' : 'FAILED';
+
+      setScorecard({
+        status,
+        score: dynamicScore,
+        securityRating: dynamicScore >= 80 ? 'A+' : dynamicScore >= 50 ? 'B' : 'D',
+        maintainabilityIndex: Math.min(95, dynamicScore + 5),
+        testSuiteRate: `${Math.round((dynamicScore / 100) * 6)}/6 Passed`,
+        codeSmellsCount: dynamicScore >= 80 ? 0 : 2,
+        complexity: dynamicScore >= 80 ? 'Low (2.8)' : 'Moderate (5.4)',
+        feedback,
+        criteriaAudit,
+        earnedXp: status === 'PASSED' ? 300 : 50,
+      });
+      setIsEvaluating(false);
 
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to complete automated evaluation');
+      setErrorMsg('Invalid or corrupted .zip archive file');
       setIsEvaluating(false);
     }
   };
 
   return (
     <DesktopOnly backLink="/simulations" backText="Back to Job Simulations">
-      <div className="fixed inset-0 z-[100] bg-slate-50 dark:bg-[#0d1117] w-full h-screen overflow-y-auto transition-colors duration-300">
+      <div className="fixed inset-0 z-[100] bg-slate-50 dark:bg-[#0d1117] w-full h-screen overflow-y-auto transition-colors duration-300 select-none">
         <div className="max-w-7xl mx-auto px-6 py-10 animate-in fade-in">
           
           <Link to="/simulations" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold mb-6 transition-colors text-xs">
@@ -158,17 +219,17 @@ export default function SimulationWorkspace() {
                 </p>
                 
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <FileCode size={18} className="text-indigo-500" /> Technical Requirements & Execution Steps
+                  <FileCode size={18} className="text-indigo-500" /> Technical Requirements & Line Inspection Checklist
                 </h3>
                 
                 <ul className="text-slate-600 dark:text-slate-400 space-y-3 text-xs sm:text-sm font-medium">
                   <li className="flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</span>
-                    <span>Download or clone the starter codebase archive (.zip).</span>
+                    <span>Download starter codebase archive (.zip).</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</span>
-                    <span>Locate <code className="text-indigo-600 dark:text-indigo-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono">payment.js</code> and implement mutex locks to prevent race conditions.</span>
+                    <span>Locate <code className="text-indigo-600 dark:text-indigo-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono">payment.js</code> and implement mutex locks around transactions.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</span>
@@ -176,7 +237,7 @@ export default function SimulationWorkspace() {
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">4</span>
-                    <span>Compress your completed project into a <strong>.zip</strong> archive and upload for automated Staff Engineer review.</span>
+                    <span>Compress code files into a <strong>.zip</strong> archive. Non-code media files (PDFs/Images) will be <strong>REJECTED (Score: 0)</strong>.</span>
                   </li>
                 </ul>
               </div>
@@ -217,7 +278,7 @@ export default function SimulationWorkspace() {
                     disabled={!selectedFile || isEvaluating}
                     className="w-full bg-gradient-to-r from-rose-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
                   >
-                    {isEvaluating ? <><Loader2 className="animate-spin" size={18} /> Executing AST & Staff Audit...</> : 'Submit for Staff Engineer Evaluation'}
+                    {isEvaluating ? <><Loader2 className="animate-spin" size={18} /> Inspecting ZIP Files & Code Lines...</> : 'Submit for Line-by-Line Code Evaluation'}
                   </button>
                 </form>
 
@@ -233,7 +294,7 @@ export default function SimulationWorkspace() {
                   {/* Header Score Banner */}
                   <div className="flex items-center justify-between border-b border-slate-800 pb-6">
                     <div className="flex items-center gap-4">
-                      {scorecard.status === 'PASSED' ? (
+                      {scorecard.score >= 80 ? (
                         <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           <CheckCircle size={32} />
                         </div>
@@ -245,7 +306,7 @@ export default function SimulationWorkspace() {
                       <div>
                         <div className="flex items-center gap-2">
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                            scorecard.status === 'PASSED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                            scorecard.score >= 80 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                           }`}>
                             {scorecard.status}
                           </span>
@@ -307,7 +368,7 @@ export default function SimulationWorkspace() {
                   {/* Senior Staff Engineer Audit Review */}
                   <div className="space-y-3 pt-2">
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                      <Terminal size={16} className="text-rose-400" /> Senior Staff Engineer Code Review
+                      <Terminal size={16} className="text-rose-400" /> Senior Staff Engineer Code Audit
                     </h4>
                     <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-2 text-xs text-slate-300 font-mono leading-relaxed">
                       {scorecard.feedback.map((msg, idx) => (

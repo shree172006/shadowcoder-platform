@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { Trophy, Rocket, Code2, Terminal, ArrowRight, ShieldCheck, Flame, Zap, Layers, Server, Play, Search, CheckCircle2, Sparkles } from 'lucide-react';
+import { Trophy, Rocket, Code2, Terminal, ArrowRight, ShieldCheck, Flame, Zap, Layers, Server, Play, Search, CheckCircle2, Sparkles, AlertTriangle, Clock } from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [dailyQuestClaimed, setDailyQuestClaimed] = useState(false);
 
   const userXp = user?.xp || 0;
   const userLevel = user?.level || 1;
   const streakCount = user?.streak?.currentCount || 1;
 
-  // Mock Developer Activity & Quests
   const featuredChallenges = [
     {
       id: 'auth-service',
@@ -77,7 +77,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#07090e] text-slate-900 dark:text-slate-100 p-4 lg:p-8 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#07090e] text-slate-900 dark:text-slate-100 p-4 lg:p-8 transition-colors duration-300 select-none">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* TOP BAR: Quick Command Bar & Stats Pill */}
@@ -113,6 +113,39 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* DAILY QUEST COMPULSION & XP PENALTY BANNER */}
+        <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-indigo-500/10 border-2 border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-black text-xs uppercase tracking-wider">
+              <Clock size={18} /> Daily Compulsion Quest Active • Resets at Midnight
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              Complete 1 Job Simulation or Pass 1 Learn Test Today
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+              <AlertTriangle size={14} className="text-rose-500 shrink-0" />
+              <span>Penalty Warning: Missing your daily task incurs a <strong className="text-rose-500">-50 XP Penalty</strong> & resets streak to 0!</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            {dailyQuestClaimed ? (
+              <span className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5">
+                <CheckCircle2 size={16} /> Daily Quest Complete (+100 XP)
+              </span>
+            ) : (
+              <button
+                onClick={() => {
+                  setDailyQuestClaimed(true);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-md transition-all flex items-center gap-1.5"
+              >
+                <Zap size={16} className="fill-slate-950" /> Claim Daily Quest (+100 XP)
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* SEARCH & FILTER CONTROLS */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
@@ -139,121 +172,47 @@ export default function Dashboard() {
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search challenges by title..."
+              placeholder="Search challenges..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-sm"
+              className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500"
             />
           </div>
         </div>
 
-        {/* MAIN DASHBOARD GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* CHALLENGES LISTING (8 Cols) */}
-          <div className="lg:col-span-8 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Code2 size={20} className="text-indigo-600 dark:text-indigo-400" /> Live Challenges Launchpad
-              </h3>
-              <span className="text-xs text-slate-500 font-semibold">{filteredItems.length} Available</span>
-            </div>
+        {/* CHALLENGE CARDS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredItems.map((item) => (
+            <div
+              key={item.id}
+              className="p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 space-y-4 hover:border-indigo-500/50 transition-all group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl">{item.icon}</span>
+                <span className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold">
+                  + {item.xp} XP
+                </span>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="group relative p-6 rounded-3xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 hover:border-indigo-500/50 shadow-sm dark:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
+              <div>
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{item.company}</span>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{item.description}</p>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/80 text-xs">
+                <span className="font-bold text-slate-600 dark:text-slate-400">{item.difficulty}</span>
+                <button
+                  onClick={() => navigate(item.type === 'simulation' ? `/task/${item.id}` : `/problem/${item.id}`)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white font-bold text-xs transition-all flex items-center gap-1.5"
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-2xl p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50">
-                        {item.icon}
-                      </span>
-                      <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                        item.difficulty === 'Senior' || item.difficulty === 'Lead Architect'
-                          ? 'bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400'
-                          : 'bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400'
-                      }`}>
-                        {item.difficulty}
-                      </span>
-                    </div>
-
-                    <h4 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-2">
-                      {item.title}
-                    </h4>
-
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
-                      {item.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
-                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">+{item.xp} XP</span>
-                    
-                    <button
-                      onClick={() => navigate(item.type === 'simulation' ? `/simulations` : `/problems`)}
-                      className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-indigo-600 text-slate-700 dark:text-slate-200 group-hover:text-white text-xs font-bold transition-all flex items-center gap-1.5"
-                    >
-                      <Play size={14} className="fill-current" /> Start Challenge
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  Start Task <ArrowRight size={14} />
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* RIGHT SIDEBAR: COMPETITION LEADERBOARD (4 Cols) */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Trophy size={20} className="text-amber-500" /> Global Leaderboard
-              </h3>
-              <Link to="/leaderboard" className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                View All
-              </Link>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 space-y-3 shadow-sm dark:shadow-xl">
-              {[
-                { rank: 1, name: `${user?.name || 'Shadow Monarch'} (You)`, xp: 25000, streak: 30, avatar: '👑', isCurrentUser: true },
-                { rank: 2, name: 'Elena Rostova', xp: 14200, streak: 14, avatar: '👩‍💻' },
-                { rank: 3, name: 'Marcus Chen', xp: 11850, streak: 9, avatar: '👨‍💻' },
-              ].map((item) => (
-                <div
-                  key={item.rank}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between ${
-                    item.isCurrentUser
-                      ? 'bg-indigo-50 dark:bg-indigo-600/20 border-indigo-200 dark:border-indigo-500/40 text-slate-900 dark:text-white font-bold'
-                      : 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800/60 text-slate-700 dark:text-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] ${
-                      item.rank === 1 ? 'bg-amber-400 text-slate-950' :
-                      item.rank === 2 ? 'bg-slate-300 text-slate-950' : 'bg-slate-800 text-white'
-                    }`}>
-                      #{item.rank}
-                    </span>
-                    <span className="text-base">{item.avatar}</span>
-                    <span className="text-xs font-bold truncate max-w-[110px]">{item.name}</span>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 block">{item.xp} XP</span>
-                  </div>
-                </div>
-              ))}
-
-              <Link
-                to="/leaderboard"
-                className="w-full mt-2 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
-              >
-                Climb Rankings <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
-
+          ))}
         </div>
 
       </div>
