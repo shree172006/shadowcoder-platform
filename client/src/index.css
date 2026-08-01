@@ -1,4 +1,9 @@
 @import "tailwindcss";
 
-/* Add this line below the import to enable the Dark Mode switch */
 @custom-variant dark (&:where(.dark, .dark *));
+
+html, body {
+  background-color: #07090e !important;
+  color: #f8fafc;
+  color-scheme: dark;
+}
