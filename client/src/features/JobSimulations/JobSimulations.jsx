@@ -1,48 +1,118 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Code, Database, Server, Clock, ChevronRight, CheckCircle, Filter, Trash2, Edit3, Plus, ShieldCheck } from 'lucide-react';
+import { Briefcase, Code, Database, Server, Clock, ChevronRight, CheckCircle, Filter, Trash2, Edit3, Plus, ShieldCheck, Layout, Layers, PieChart } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AdminConsoleModal from '../../components/AdminConsoleModal.jsx';
 
 const INITIAL_SIMULATION_DATA = [
+  // 1. FRONTEND DEVELOPER TRACK
   {
-    id: 'sim-001',
-    title: 'Resolve Payment Desync Bug',
-    role: 'Software Engineer',
-    difficulty: 'Medium',
-    timeLimit: '45 mins',
+    id: 'sim-fe-01',
+    title: 'React UI Performance & Re-render Bottleneck',
+    role: 'Frontend Developer',
+    track: 'frontend',
+    difficulty: 'Junior',
+    timeLimit: '40 mins',
     maxScore: 100,
     status: 'unsolved',
-    icon: <Code className="text-blue-500 dark:text-blue-400" size={24} />,
-    description: 'A race condition is causing cart totals to desync during checkout. Write a deterministic calculation function to fix the pipeline.',
+    icon: <Layout className="text-pink-500 dark:text-pink-400" size={24} />,
+    description: 'A React dashboard component re-renders 500+ times per keystroke due to inline object creation. Refactor using useMemo, useCallback, and React.memo.',
   },
   {
-    id: 'sim-002',
-    title: 'Optimize API Payload',
-    role: 'Backend Developer',
-    difficulty: 'Hard',
-    timeLimit: '60 mins',
+    id: 'sim-fe-02',
+    title: 'State Synchronization & Custom Hooks',
+    role: 'Frontend Developer',
+    track: 'frontend',
+    difficulty: 'Senior',
+    timeLimit: '55 mins',
     maxScore: 150,
     status: 'unsolved',
-    icon: <Server className="text-purple-500 dark:text-purple-400" size={24} />,
-    description: 'The user analytics endpoint is timing out. Refactor the data aggregation logic to reduce payload size by 60%.',
+    icon: <Code className="text-[#38bdf8]" size={24} />,
+    description: 'Build a custom useWebSocketSync hook to manage offline queued mutations, optimistic UI updates, and conflict resolution.',
+  },
+
+  // 2. BACKEND DEVELOPER TRACK
+  {
+    id: 'sim-be-01',
+    title: 'Resolve Payment Desync & Mutex Lock',
+    role: 'Backend Developer',
+    track: 'backend',
+    difficulty: 'Mid-Level',
+    timeLimit: '45 mins',
+    maxScore: 120,
+    status: 'unsolved',
+    icon: <Server className="text-blue-500 dark:text-blue-400" size={24} />,
+    description: 'A race condition causes cart totals to desync under high concurrent load. Write a deterministic transaction function with mutex locks and 409 status returns.',
   },
   {
-    id: 'sim-003',
-    title: 'Clean Customer Data Pipeline',
+    id: 'sim-be-02',
+    title: 'Distributed Auth & Token Rotation',
+    role: 'Backend Developer',
+    track: 'backend',
+    difficulty: 'Senior',
+    timeLimit: '60 mins',
+    maxScore: 200,
+    status: 'unsolved',
+    icon: <ShieldCheck className="text-indigo-500" size={24} />,
+    description: 'Implement JWT refresh token rotation, Redis blacklisting for logged-out tokens, and sliding session expiration.',
+  },
+
+  // 3. FULL STACK ENGINEER TRACK
+  {
+    id: 'sim-fs-01',
+    title: 'Virtual File System & Stream ZIP Parser',
+    role: 'Full Stack Engineer',
+    track: 'fullstack',
+    difficulty: 'Senior',
+    timeLimit: '60 mins',
+    maxScore: 250,
+    status: 'unsolved',
+    icon: <Layers className="text-amber-500 dark:text-amber-400" size={24} />,
+    description: 'Build a stream-based ZIP extractor and virtual file system (VFS) tree builder connecting Node.js streams to a React Monaco editor.',
+  },
+  {
+    id: 'sim-fs-02',
+    title: 'Real-Time Order Bus & WebSockets',
+    role: 'Full Stack Engineer',
+    track: 'fullstack',
+    difficulty: 'Lead Architect',
+    timeLimit: '75 mins',
+    maxScore: 350,
+    status: 'unsolved',
+    icon: <Server className="text-rose-500" size={24} />,
+    description: 'Architect a Socket.io event bus linking Express database change streams to live client UI inventory notifications.',
+  },
+
+  // 4. DATA ANALYST TRACK
+  {
+    id: 'sim-da-01',
+    title: 'Clean Customer Data & Timezone Normalizer',
     role: 'Data Analyst',
-    difficulty: 'Easy',
+    track: 'data-analytics',
+    difficulty: 'Junior',
     timeLimit: '30 mins',
-    maxScore: 50,
+    maxScore: 80,
     status: 'solved',
+    icon: <PieChart className="text-purple-500 dark:text-purple-400" size={24} />,
+    description: 'Parse a messy CSV payload, strip duplicates, normalize UTC timestamps, and validate phone number formats.',
+  },
+  {
+    id: 'sim-da-02',
+    title: 'SQL Performance Tuning & Window Aggregations',
+    role: 'Data Analyst',
+    track: 'data-analytics',
+    difficulty: 'Mid-Level',
+    timeLimit: '50 mins',
+    maxScore: 160,
+    status: 'unsolved',
     icon: <Database className="text-emerald-500 dark:text-emerald-400" size={24} />,
-    description: 'Parse a messy CSV of user data, remove duplicates, and normalize the timezone strings.',
+    description: 'Refactor slow nested subqueries into optimized SQL CTEs with ROW_NUMBER() and NTILE() window functions for revenue cohort analysis.',
   },
 ];
 
 export default function JobSimulations() {
   const { isAdmin } = useAuth();
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeTrack, setActiveTrack] = useState('all');
   const [simulations, setSimulations] = useState(INITIAL_SIMULATION_DATA);
 
   // Admin Modal State
@@ -67,7 +137,8 @@ export default function JobSimulations() {
       const newSim = {
         id: `sim-${Date.now()}`,
         title: data.title,
-        role: data.category || 'Software Engineer',
+        role: data.companyName || 'Software Engineer',
+        track: data.targetRole || 'fullstack',
         difficulty: data.difficulty,
         timeLimit: '45 mins',
         maxScore: data.xpReward || 100,
@@ -88,9 +159,8 @@ export default function JobSimulations() {
   };
 
   const filteredSimulations = simulations.filter((sim) => {
-    if (activeFilter === 'Solved') return sim.status === 'solved';
-    if (activeFilter === 'Unsolved') return sim.status === 'unsolved';
-    return true;
+    if (activeTrack === 'all') return true;
+    return sim.track === activeTrack;
   });
 
   return (
@@ -115,27 +185,32 @@ export default function JobSimulations() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-            <Briefcase className="text-blue-600 dark:text-blue-400" /> Job Simulations
+            <Briefcase className="text-blue-600 dark:text-blue-400" /> Real-World Job Simulations
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm">
-            Experience real production codebases, debug live tickets, and run automated test suites.
+            Experience real production codebases across 4 specialization career tracks.
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700/50 self-start md:self-auto">
-          <Filter size={16} className="text-slate-400 ml-2" />
-          {['All', 'Unsolved', 'Solved'].map((filter) => (
+        {/* Career Track Filters */}
+        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-x-auto self-start md:self-auto max-w-full">
+          {[
+            { id: 'all', label: 'All Tracks' },
+            { id: 'frontend', label: 'Frontend' },
+            { id: 'backend', label: 'Backend' },
+            { id: 'fullstack', label: 'Full Stack' },
+            { id: 'data-analytics', label: 'Data Analyst' },
+          ].map((track) => (
             <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeFilter === filter
-                  ? 'bg-white dark:bg-[#0d1117] text-slate-900 dark:text-white shadow-sm'
+              key={track.id}
+              onClick={() => setActiveTrack(track.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                activeTrack === track.id
+                  ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
-              {filter}
+              {track.label}
             </button>
           ))}
         </div>
@@ -156,8 +231,8 @@ export default function JobSimulations() {
                 
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                    sim.difficulty === 'Hard' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400' :
-                    sim.difficulty === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400' :
+                    sim.difficulty === 'Hard' || sim.difficulty === 'Lead Architect' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400' :
+                    sim.difficulty === 'Medium' || sim.difficulty === 'Senior' || sim.difficulty === 'Mid-Level' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400' :
                     'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
                   }`}>
                     {sim.difficulty}
@@ -189,7 +264,7 @@ export default function JobSimulations() {
                 {sim.title}
               </h2>
               
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">
+              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-3">
                 {sim.role}
               </p>
 
@@ -205,7 +280,7 @@ export default function JobSimulations() {
 
               <Link
                 to={`/task/${sim.id}`}
-                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all hover:scale-105"
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all hover:scale-105"
               >
                 Enter Scenario <ChevronRight size={14} />
               </Link>

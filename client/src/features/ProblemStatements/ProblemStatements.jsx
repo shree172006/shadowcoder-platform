@@ -1,56 +1,111 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Cpu, Layout, Server, ChevronRight, Star, Plus, Edit3, Trash2, ShieldCheck, Filter } from 'lucide-react';
+import { Search, Cpu, Layout, Server, ChevronRight, Star, Plus, Edit3, Trash2, ShieldCheck, Filter, PieChart, Layers } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AdminConsoleModal from '../../components/AdminConsoleModal.jsx';
 
 const INITIAL_PROBLEM_DATA = [
+  // 1. FRONTEND TRACK
   {
-    id: 'prob-001',
-    title: 'LRU Cache Implementation',
-    category: 'Data Structures',
-    role: 'Backend',
-    difficulty: 'Medium',
-    xp: 300,
-    icon: <Cpu className="text-purple-500 dark:text-purple-400" size={24} />,
-    description: 'Design a data structure that follows the constraints of a Least Recently Used (LRU) cache.',
+    id: 'prob-fe-01',
+    title: 'Responsive CSS Grid & Breakpoint Engine',
+    category: 'UI / UX',
+    track: 'frontend',
+    role: 'Frontend',
+    difficulty: 'Easy',
+    xp: 150,
+    icon: <Layout className="text-pink-500 dark:text-pink-400" size={24} />,
+    description: 'Build a dynamic grid layout that automatically computes column tracks based on viewport width without triggering layout reflows.',
   },
   {
-    id: 'prob-002',
-    title: 'Responsive Grid Layout',
-    category: 'UI/UX',
+    id: 'prob-fe-02',
+    title: 'DOM Event Debouncing & Throttling',
+    category: 'JavaScript',
+    track: 'frontend',
     role: 'Frontend',
     difficulty: 'Medium',
     xp: 250,
-    icon: <Layout className="text-pink-500 dark:text-pink-400" size={24} />,
-    description: 'Build a CSS Grid layout that dynamically adjusts from 1 to 4 columns based on screen width.',
+    icon: <Cpu className="text-[#38bdf8]" size={24} />,
+    description: 'Implement leading & trailing edge debounce and throttle wrapper functions for high-frequency input handlers.',
   },
+
+  // 2. BACKEND TRACK
   {
-    id: 'prob-003',
-    title: 'Database Normalization',
+    id: 'prob-be-01',
+    title: 'O(1) LRU Cache Implementation',
     category: 'Data Structures',
+    track: 'backend',
     role: 'Backend',
     difficulty: 'Medium',
     xp: 300,
-    icon: <Server className="text-emerald-500 dark:text-emerald-400" size={24} />,
-    description: 'Normalize the provided e-commerce database schema to 3NF to eliminate data redundancy.',
+    icon: <Server className="text-purple-500 dark:text-purple-400" size={24} />,
+    description: 'Design a Least Recently Used (LRU) cache using a Doubly-Linked List and Hash Map with O(1) time complexity for get() and put().',
   },
   {
-    id: 'prob-004',
-    title: 'API Rate Limiter',
+    id: 'prob-be-02',
+    title: 'Token Bucket API Rate Limiter',
     category: 'Systems Design',
+    track: 'backend',
+    role: 'Backend',
+    difficulty: 'Hard',
+    xp: 450,
+    icon: <ShieldCheck className="text-blue-500 dark:text-blue-400" size={24} />,
+    description: 'Implement a thread-safe token bucket rate limiter algorithm restricting client requests to 100 req/min.',
+  },
+
+  // 3. FULL STACK TRACK
+  {
+    id: 'prob-fs-01',
+    title: 'Real-Time Pub/Sub Event Bus',
+    category: 'Systems Design',
+    track: 'fullstack',
     role: 'Full Stack',
     difficulty: 'Hard',
     xp: 500,
-    icon: <Server className="text-amber-500 dark:text-amber-400" size={24} />,
-    description: 'Implement a sliding window counter rate limiter for an Express API gateway.',
+    icon: <Layers className="text-amber-500 dark:text-amber-400" size={24} />,
+    description: 'Architect an in-memory publish-subscribe event emitter with pattern matching, topic wildcards, and automatic dead-letter queueing.',
+  },
+  {
+    id: 'prob-fs-02',
+    title: 'Database 3NF Schema Normalization',
+    category: 'Databases',
+    track: 'fullstack',
+    role: 'Full Stack',
+    difficulty: 'Medium',
+    xp: 280,
+    icon: <Server className="text-emerald-500 dark:text-emerald-400" size={24} />,
+    description: 'Normalize an un-indexed e-commerce order table into 3rd Normal Form (3NF) to eliminate transitive functional dependencies.',
+  },
+
+  // 4. DATA ANALYST TRACK
+  {
+    id: 'prob-da-01',
+    title: 'SQL Window Functions & Cohort Analysis',
+    category: 'SQL Analytics',
+    track: 'data-analytics',
+    role: 'Data Analyst',
+    difficulty: 'Medium',
+    xp: 320,
+    icon: <PieChart className="text-purple-500 dark:text-purple-400" size={24} />,
+    description: 'Write a SQL query using ROW_NUMBER() and NTILE(4) to compute monthly customer retention cohorts and median spending.',
+  },
+  {
+    id: 'prob-da-02',
+    title: 'CSV Data Normalizer & Outlier Removal',
+    category: 'Data Wrangling',
+    track: 'data-analytics',
+    role: 'Data Analyst',
+    difficulty: 'Easy',
+    xp: 180,
+    icon: <Cpu className="text-emerald-500 dark:text-emerald-400" size={24} />,
+    description: 'Parse raw sensor CSV records, filter statistical z-score outliers, and calculate 7-day moving averages.',
   },
 ];
 
 export default function ProblemStatements() {
   const { isAdmin } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeTrack, setActiveTrack] = useState('All');
   const [problems, setProblems] = useState(INITIAL_PROBLEM_DATA);
 
   // Admin Modal State
@@ -76,6 +131,7 @@ export default function ProblemStatements() {
         id: `prob-${Date.now()}`,
         title: data.title,
         category: data.category || 'Algorithms',
+        track: data.targetRole || 'fullstack',
         role: 'Full Stack',
         difficulty: data.difficulty,
         xp: data.xpReward || 200,
@@ -98,8 +154,8 @@ export default function ProblemStatements() {
     const matchesSearch =
       prob.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prob.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeCategory === 'All' || prob.category === activeCategory;
-    return matchesSearch && matchesCategory;
+    const matchesTrack = activeTrack === 'All' || prob.track === activeTrack;
+    return matchesSearch && matchesTrack;
   });
 
   return (
@@ -127,7 +183,7 @@ export default function ProblemStatements() {
             <Cpu className="text-purple-600 dark:text-purple-400" /> Problem Statements
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm">
-            Master data structures, algorithms, system design, and API optimization.
+            Master algorithms, system design, data structures, and SQL across 4 career tracks.
           </p>
         </div>
 
@@ -144,19 +200,25 @@ export default function ProblemStatements() {
         </div>
       </div>
 
-      {/* Categories */}
+      {/* Career Track Filters */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6">
-        {['All', 'Data Structures', 'UI/UX', 'Systems Design'].map((cat) => (
+        {[
+          { id: 'All', label: 'All Tracks' },
+          { id: 'frontend', label: 'Frontend' },
+          { id: 'backend', label: 'Backend' },
+          { id: 'fullstack', label: 'Full Stack' },
+          { id: 'data-analytics', label: 'Data Analyst' },
+        ].map((track) => (
           <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
+            key={track.id}
+            onClick={() => setActiveTrack(track.id)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              activeCategory === cat
+              activeTrack === track.id
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
                 : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            {cat}
+            {track.label}
           </button>
         ))}
       </div>
@@ -204,7 +266,7 @@ export default function ProblemStatements() {
                 {prob.title}
               </h2>
 
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">
+              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-3">
                 {prob.category} • {prob.role}
               </p>
 
