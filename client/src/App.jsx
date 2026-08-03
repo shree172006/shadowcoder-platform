@@ -1,8 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './layouts/Navbar.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import { useAuth } from './context/AuthContext.jsx';
 
 // Direct Feature Imports for Instant 0ms Route Transitions & Zero Black Screen Flashes
+import LandingPage from './features/Landing/LandingPage.jsx';
 import AuthPage from './features/Auth/AuthPage.jsx';
 import Dashboard from './features/Dashboard/Dashboard.jsx';
 import GlobalLeaderboard from './features/Leaderboard/GlobalLeaderboard.jsx';
@@ -15,6 +17,22 @@ import ProblemWorkspace from './features/ProblemStatements/ProblemWorkspace.jsx'
 import Profile from './features/Profile/Profile.jsx';
 import Settings from './features/Settings/Settings.jsx';
 
+function RootRouteController() {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400 space-y-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+        <span className="text-xs font-mono font-bold tracking-wider text-slate-500">Initializing Session...</span>
+      </div>
+    );
+  }
+
+  // BEFORE Sign In -> Landing Page; AFTER Sign In -> Developer Dashboard
+  return user ? <Dashboard /> : <LandingPage />;
+}
+
 export default function App() {
   return (
     <Router>
@@ -23,19 +41,22 @@ export default function App() {
         
         <main>
           <Routes>
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/signup" element={<AuthPage />} />
             
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/leaderboard" element={<GlobalLeaderboard />} />
+            <Route path="/" element={<RootRouteController />} />
+            
+            {/* Authenticated Protected Routes */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/simulations" element={<JobSimulations />} />
             <Route path="/task/:id" element={<SimulationWorkspace />} />
             <Route path="/learn" element={<Learn />} />
             <Route path="/problems" element={<ProblemStatements />} />
             <Route path="/problem/:id" element={<ProblemWorkspace />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/leaderboard" element={<GlobalLeaderboard />} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
             {/* RBAC Protected Admin Route */}
             <Route
