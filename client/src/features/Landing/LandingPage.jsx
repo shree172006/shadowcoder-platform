@@ -14,7 +14,7 @@ const CAREER_TRACKS = [
 const FEATURES = [
   { icon: <Briefcase className="text-indigo-500" size={24} />, title: 'Real-World Job Simulations', desc: 'Debug real codebase tickets, submit pull requests, and pass executive code audits.' },
   { icon: <Terminal className="text-emerald-500" size={24} />, title: 'In-Browser JS/Python Studio', desc: 'Write, execute, and verify solutions in a safe WebWorker code execution engine.' },
-  { icon: <BookOpen className="text-amber-500" size={24} />, title: 'Official Roadmap.sh Paths', desc: 'Follow step-by-step career flowcharts with interactive module verification tests.' },
+  { icon: <BookOpen className="text-amber-500" size={24} />, title: 'Official Developer Roadmap Paths', desc: 'Follow step-by-step career flowcharts with interactive module verification tests.' },
   { icon: <Trophy className="text-purple-500" size={24} />, title: 'Global S-Rank Leaderboards', desc: 'Earn XP, level up your hunter rank, and compete against top global engineers.' },
 ];
 
