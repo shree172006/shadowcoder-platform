@@ -44,7 +44,10 @@ const ParticleCanvas = () => {
     }));
 
     const draw = () => {
-      if (!ctx || !canvas) return;
+      if (!ctx || !canvas || document.hidden) {
+        animationFrameId = requestAnimationFrame(draw);
+        return;
+      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p) => {
         p.x += p.dx;
@@ -55,8 +58,6 @@ const ParticleCanvas = () => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(99, 102, 241, ${p.alpha})`;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#6366f1';
         ctx.fill();
       });
 

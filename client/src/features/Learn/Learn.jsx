@@ -5,7 +5,7 @@ import 'reactflow/dist/style.css';
 import { 
   BookOpen, Code2, Database, Terminal, ArrowLeft, CheckCircle, Lock, 
   Play, Plus, Layout, Server, PieChart, Layers, FileJson, Check, Zap, Search,
-  ShieldCheck, Edit3, Trash2, Save, X, Link2, Move, Menu, ChevronRight, HelpCircle, AlertCircle, Award
+  ShieldCheck, Edit3, Trash2, Save, X, Link2, Move, Menu, ChevronRight, HelpCircle, AlertCircle, Award, Wrench
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AdminConsoleModal from '../../components/AdminConsoleModal.jsx';
@@ -71,7 +71,6 @@ export default function Learn() {
   const [activeLesson, setActiveLesson] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
   const [searchQuery, setSearchQuery] = useState(''); 
-  const [mobileSyllabusOpen, setMobileSyllabusOpen] = useState(false);
 
   // Quiz State for Active Lesson
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
@@ -98,7 +97,7 @@ export default function Learn() {
     item: null,
   });
 
-  // Active Node Inspector Drawer Modal State
+  // Active Node Inspector Drawer Modal State (Admin Only)
   const [nodeEditorState, setNodeEditorState] = useState({
     isOpen: false,
     isCreatingNew: false,
@@ -370,6 +369,142 @@ export default function Learn() {
     </div>
   ) : null;
 
+  // --- VIEW 3: DEDICATED FULL LESSON / MODULE WORKSPACE VIEW ---
+  if (activeLesson) {
+    return (
+      <div className="py-8 max-w-5xl mx-auto px-4 md:px-8 animate-in fade-in transition-colors duration-300">
+        <Toast />
+
+        {/* Top Navigation Back Button */}
+        <button 
+          onClick={() => setActiveLesson(null)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-indigo-600 hover:text-white font-bold text-xs transition-all shadow-sm mb-6 cursor-pointer"
+        >
+          <ArrowLeft size={16} /> Back to Roadmap Flowchart
+        </button>
+
+        {/* Header Banner */}
+        <div className="bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4 mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+              <span className="text-xs font-black text-indigo-500 uppercase tracking-widest block mb-1">
+                {selectedTopic?.title || 'Learning Roadmap'} • Module Milestone
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                {activeLesson.data?.label || activeLesson.data?.title || 'Lesson Workspace'}
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                activeLesson.data?.status === 'completed' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' :
+                activeLesson.data?.status === 'active' ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' :
+                'bg-slate-200 dark:bg-slate-800 text-slate-500'
+              }`}>
+                {activeLesson.data?.status || 'Active'}
+              </span>
+              <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold">
+                +50 XP Node
+              </span>
+            </div>
+          </div>
+
+          {/* Lesson Overview & Architecture Guide */}
+          <div className="space-y-3 pt-2">
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              <BookOpen size={16} className="text-indigo-500" /> Module Overview & Architecture Guide
+            </h2>
+            <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+              {activeLesson.data?.overview || 'Master key architecture principles for this milestone.'}
+            </p>
+          </div>
+
+          {/* Tools & Ecosystem */}
+          {activeLesson.data?.tools && activeLesson.data.tools.length > 0 && (
+            <div className="pt-2">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <Wrench size={14} className="text-amber-400" /> Ecosystem Tools & Technologies
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {activeLesson.data.tools.map((t) => (
+                  <span key={t} className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Code Playbook Implementation Example */}
+        {activeLesson.data?.codeSnippet && (
+          <div className="bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4 mb-8">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <Code2 size={16} className="text-emerald-400" /> Playbook Implementation Code
+              </h3>
+              <span className="text-xs font-mono text-slate-500">production-example.js</span>
+            </div>
+            <div className="p-5 rounded-2xl bg-[#0d1117] border border-slate-800 font-mono text-xs sm:text-sm text-emerald-400 overflow-x-auto shadow-inner leading-relaxed">
+              <pre>{activeLesson.data.codeSnippet}</pre>
+            </div>
+          </div>
+        )}
+
+        {/* Module Verification Test Challenge */}
+        {activeLesson.data?.testQuestion && (
+          <div className="bg-white dark:bg-[#161b22] border-2 border-indigo-500/30 rounded-3xl p-6 sm:p-8 shadow-lg space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-sm uppercase tracking-wider">
+                <Award size={20} /> Module Verification Test Challenge
+              </div>
+              <span className="text-xs font-bold text-amber-500 font-mono">+50 XP Award</span>
+            </div>
+
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
+              {activeLesson.data.testQuestion.question}
+            </h3>
+
+            <div className="space-y-3">
+              {activeLesson.data.testQuestion.options.map((opt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => !quizSubmitted && setSelectedAnswerIndex(idx)}
+                  className={`w-full p-4 rounded-2xl border-2 text-left text-xs sm:text-sm font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                    selectedAnswerIndex === idx
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg scale-[1.01]'
+                      : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-indigo-500'
+                  }`}
+                >
+                  <span>{opt}</span>
+                  <span className="w-6 h-6 rounded-full border border-current flex items-center justify-center font-bold text-xs shrink-0 ml-3">
+                    {String.fromCharCode(65 + idx)}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {!quizSubmitted ? (
+              <button
+                onClick={handleQuizSubmit}
+                disabled={selectedAnswerIndex === null}
+                className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg transition-all disabled:opacity-50 uppercase tracking-wider cursor-pointer"
+              >
+                Submit Verification Answer
+              </button>
+            ) : (
+              <div className={`p-5 rounded-2xl border-2 text-xs sm:text-sm leading-relaxed space-y-2 ${
+                isQuizCorrect ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' : 'bg-rose-500/10 border-rose-500/40 text-rose-400'
+              }`}>
+                <p className="font-black text-base">{isQuizCorrect ? '🎉 Verification Test Passed!' : '❌ Incorrect Answer'}</p>
+                <p className="font-medium">{activeLesson.data.testQuestion.explanation}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // --- VIEW 1: CATALOG OVERVIEW ---
   if (!selectedTopic) {
     return (
@@ -510,7 +645,7 @@ export default function Learn() {
       <div className="md:hidden flex-1 overflow-y-auto px-4 py-6 space-y-4">
         <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center gap-2">
           <BookOpen size={16} className="shrink-0" />
-          <span>Tap any module to view lesson & pass verification test to unlock next!</span>
+          <span>Tap any module to open dedicated lesson page & test!</span>
         </div>
 
         <div className="space-y-3 relative pl-4 border-l-2 border-slate-200 dark:border-slate-800">
@@ -537,7 +672,7 @@ export default function Learn() {
                   <div>
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">{node.data.label}</h3>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                      {node.data.overview || 'Tap to view lesson & test'}
+                      {node.data.overview || 'Tap to open lesson page'}
                     </p>
                   </div>
                 </div>
@@ -559,91 +694,6 @@ export default function Learn() {
           ))}
         </div>
       </div>
-
-      {/* ACTIVE NODE LESSON & VERIFICATION TEST MODAL DRAWER */}
-      {activeLesson && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-[#161b22] border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-6 animate-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div>
-                <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest block mb-1">Active Lesson Module</span>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white">{activeLesson.data.label}</h3>
-              </div>
-              <button onClick={() => setActiveLesson(null)} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <BookOpen size={14} className="text-indigo-400" /> Module Overview
-              </h4>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                {activeLesson.data.overview || 'Master key principles for this milestone.'}
-              </p>
-            </div>
-
-            {activeLesson.data.codeSnippet && (
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                  <Code2 size={14} className="text-emerald-400" /> Playbook Code Example
-                </h4>
-                <div className="p-4 rounded-2xl bg-[#0d1117] border border-slate-800 font-mono text-xs text-emerald-400 overflow-x-auto shadow-inner">
-                  <pre>{activeLesson.data.codeSnippet}</pre>
-                </div>
-              </div>
-            )}
-
-            {activeLesson.data.testQuestion && (
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-4 pt-4">
-                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-xs uppercase tracking-wider">
-                  <Award size={16} /> Module Verification Test Challenge
-                </div>
-
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
-                  {activeLesson.data.testQuestion.question}
-                </h4>
-
-                <div className="space-y-2">
-                  {activeLesson.data.testQuestion.options.map((opt, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => !quizSubmitted && setSelectedAnswerIndex(idx)}
-                      className={`w-full p-3 rounded-xl border text-left text-xs font-semibold transition-all flex items-center justify-between ${
-                        selectedAnswerIndex === idx
-                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-indigo-400'
-                      }`}
-                    >
-                      <span>{opt}</span>
-                      <span className="w-5 h-5 rounded-full border border-current flex items-center justify-center font-bold text-[10px]">
-                        {String.fromCharCode(65 + idx)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                {!quizSubmitted ? (
-                  <button
-                    onClick={handleQuizSubmit}
-                    disabled={selectedAnswerIndex === null}
-                    className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all disabled:opacity-50"
-                  >
-                    Submit Test Answer
-                  </button>
-                ) : (
-                  <div className={`p-4 rounded-xl border text-xs leading-relaxed space-y-1 ${
-                    isQuizCorrect ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                  }`}>
-                    <p className="font-bold">{isQuizCorrect ? '✅ Verification Test Passed!' : '❌ Incorrect Answer'}</p>
-                    <p>{activeLesson.data.testQuestion.explanation}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* NODE EDITOR MODAL (ADMIN ONLY) */}
       {nodeEditorState.isOpen && (
