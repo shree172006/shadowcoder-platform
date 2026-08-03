@@ -54,7 +54,7 @@ export default function App() {
             <Route path="/learn" element={<Learn />} />
             <Route path="/problems" element={<ProblemStatements />} />
             <Route path="/problem/:id" element={<ProblemWorkspace />} />
-            <Route path="/leaderboard" element={<GlobalLeaderboard />} />
+            <Route path="/leaderboard" element={<ProtectedRoute><GlobalLeaderboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 

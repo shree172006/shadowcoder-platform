@@ -52,7 +52,6 @@ export default function Navbar() {
     { title: 'Job Simulations', path: '/simulations' },
     { title: 'Problem Statements', path: '/problems' },
     { title: 'Learn Roadmaps', path: '/learn' },
-    { title: 'Leaderboard', path: '/leaderboard' },
   ];
 
   return (
