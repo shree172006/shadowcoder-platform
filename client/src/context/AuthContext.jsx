@@ -38,9 +38,13 @@ export function AuthProvider({ children }) {
   }, [fetchMe]);
 
   const register = useCallback(async ({ name, email, password, role, track }) => {
-    const data = await apiClient('/auth/register', {
+    const { signUpWithEmail } = await import('../lib/firebase');
+    const firebaseUser = await signUpWithEmail(email, password);
+    const idToken = await firebaseUser.getIdToken();
+
+    const data = await apiClient('/auth/firebase', {
       method: 'POST',
-      body: { name, email, password, role, track },
+      body: { idToken, name, role, track },
     });
     if (data && data.user) {
       setUser(data.user);
@@ -50,9 +54,13 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    const data = await apiClient('/auth/login', {
+    const { signInWithEmail } = await import('../lib/firebase');
+    const firebaseUser = await signInWithEmail(email, password);
+    const idToken = await firebaseUser.getIdToken();
+
+    const data = await apiClient('/auth/firebase', {
       method: 'POST',
-      body: { email, password },
+      body: { idToken },
     });
     if (data && data.user) {
       setUser(data.user);
@@ -63,6 +71,10 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
+      const { auth } = await import('../lib/firebase');
+      if (auth.currentUser) {
+        await auth.signOut();
+      }
       await apiClient('/auth/logout', { method: 'POST' });
     } catch (err) {
       console.error('Logout error:', err);
@@ -72,9 +84,16 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const triggerOAuth = useCallback((provider) => {
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    window.location.href = `${backendUrl}/auth/${provider}`;
+  const loginWithFirebaseGoogle = useCallback(async (idToken) => {
+    const data = await apiClient('/auth/firebase', {
+      method: 'POST',
+      body: { idToken },
+    });
+    if (data && data.user) {
+      setUser(data.user);
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.user));
+    }
+    return data.user;
   }, []);
 
   const value = useMemo(
@@ -87,10 +106,10 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
-      triggerOAuth,
+      loginWithFirebaseGoogle,
       refreshUser: fetchMe,
     }),
-    [user, loading, login, register, logout, triggerOAuth, fetchMe]
+    [user, loading, login, register, logout, loginWithFirebaseGoogle, fetchMe]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

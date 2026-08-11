@@ -17,5 +17,8 @@
     "realtime"
   ],
   "author": "DevTier Team",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^12.17.1"
+  }
 }

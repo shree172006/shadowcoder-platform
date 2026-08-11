@@ -6,9 +6,7 @@ import compression from 'compression';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import passport from 'passport';
 import connectDB from './config/db.js';
-import configurePassport from './config/passport.js';
 import { initializeSocket } from './socket/socketManager.js';
 import authRoutes from './routes/authRoutes.js';
 import simulationRoutes from './routes/simulationRoutes.js';
@@ -17,7 +15,6 @@ import errorMiddleware from './middleware/errorMiddleware.js';
 
 dotenv.config();
 connectDB();
-configurePassport();
 
 // Ensure upload directories exist
 const tempUploadDir = path.resolve(process.cwd(), 'uploads', 'temp');
@@ -59,7 +56,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(passport.initialize());
 
 // API Routes
 app.use('/api/auth', authRoutes);

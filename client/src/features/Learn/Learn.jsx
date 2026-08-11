@@ -16,54 +16,9 @@ import { BACKEND_COURSE } from './courses/BackendCourse.jsx';
 import { FULLSTACK_COURSE } from './courses/FullStackCourse.jsx';
 import { DATA_ANALYTICS_COURSE } from './courses/DataAnalyticsCourse.jsx';
 
-// --- ICON RENDER HELPER ---
-const renderTopicIcon = (icon) => {
-  if (React.isValidElement(icon)) return icon;
-  const iconStr = typeof icon === 'string' ? icon.toLowerCase() : '';
-  switch (iconStr) {
-    case 'frontend':
-    case 'layout':
-    case 'html-css':
-      return <Layout className="text-pink-500" size={32} />;
-    case 'backend':
-    case 'server':
-      return <Server className="text-blue-500" size={32} />;
-    case 'data-analytics':
-    case 'piechart':
-      return <PieChart className="text-purple-500" size={32} />;
-    case 'fullstack':
-    case 'layers':
-      return <Layers className="text-amber-500" size={32} />;
-    case 'python':
-    case 'terminal':
-      return <Terminal className="text-blue-600" size={32} />;
-    case 'react':
-    case 'code2':
-      return <Code2 className="text-cyan-500" size={32} />;
-    case 'sql':
-    case 'database':
-      return <Database className="text-emerald-500" size={32} />;
-    case 'javascript':
-    case 'filejson':
-      return <FileJson className="text-yellow-500" size={32} />;
-    default:
-      return <BookOpen className="text-indigo-500" size={32} />;
-  }
-};
-
-const INITIAL_CAREER_PATHS = [
-  { id: 'frontend', title: 'Frontend Developer', icon: 'frontend', modules: 9, completed: 3 },
-  { id: 'backend', title: 'Backend Developer', icon: 'backend', modules: 5, completed: 2 },
-  { id: 'data-analytics', title: 'Data Analytics', icon: 'data-analytics', modules: 2, completed: 1 },
-  { id: 'fullstack', title: 'Full Stack Engineer', icon: 'fullstack', modules: 3, completed: 2 },
-];
-
-const INITIAL_SKILL_PATHS = [
-  { id: 'react', title: 'React', icon: 'react', modules: 8, completed: 4 },
-  { id: 'sql', title: 'SQL / Databases', icon: 'sql', modules: 5, completed: 5 },
-  { id: 'html-css', title: 'HTML & CSS', icon: 'html-css', modules: 10, completed: 10 },
-  { id: 'javascript', title: 'JavaScript', icon: 'javascript', modules: 15, completed: 8 },
-];
+import { INITIAL_CAREER_PATHS, INITIAL_SKILL_PATHS, renderTopicIcon } from './data/coursesData.jsx';
+import QuizModal from './components/QuizModal.jsx';
+import CourseCard from './components/CourseCard.jsx';
 
 export default function Learn() {
   const { isAdmin } = useAuth();
@@ -451,56 +406,14 @@ export default function Learn() {
         )}
 
         {/* Module Verification Test Challenge */}
-        {activeLesson.data?.testQuestion && (
-          <div className="bg-white dark:bg-[#161b22] border-2 border-indigo-500/30 rounded-3xl p-6 sm:p-8 shadow-lg space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-sm uppercase tracking-wider">
-                <Award size={20} /> Module Verification Test Challenge
-              </div>
-              <span className="text-xs font-bold text-amber-500 font-mono">+50 XP Award</span>
-            </div>
-
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
-              {activeLesson.data.testQuestion.question}
-            </h3>
-
-            <div className="space-y-3">
-              {activeLesson.data.testQuestion.options.map((opt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => !quizSubmitted && setSelectedAnswerIndex(idx)}
-                  className={`w-full p-4 rounded-2xl border-2 text-left text-xs sm:text-sm font-semibold transition-all flex items-center justify-between cursor-pointer ${
-                    selectedAnswerIndex === idx
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg scale-[1.01]'
-                      : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-indigo-500'
-                  }`}
-                >
-                  <span>{opt}</span>
-                  <span className="w-6 h-6 rounded-full border border-current flex items-center justify-center font-bold text-xs shrink-0 ml-3">
-                    {String.fromCharCode(65 + idx)}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {!quizSubmitted ? (
-              <button
-                onClick={handleQuizSubmit}
-                disabled={selectedAnswerIndex === null}
-                className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg transition-all disabled:opacity-50 uppercase tracking-wider cursor-pointer"
-              >
-                Submit Verification Answer
-              </button>
-            ) : (
-              <div className={`p-5 rounded-2xl border-2 text-xs sm:text-sm leading-relaxed space-y-2 ${
-                isQuizCorrect ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' : 'bg-rose-500/10 border-rose-500/40 text-rose-400'
-              }`}>
-                <p className="font-black text-base">{isQuizCorrect ? '🎉 Verification Test Passed!' : '❌ Incorrect Answer'}</p>
-                <p className="font-medium">{activeLesson.data.testQuestion.explanation}</p>
-              </div>
-            )}
-          </div>
-        )}
+        <QuizModal
+          testQuestion={activeLesson.data?.testQuestion}
+          selectedAnswerIndex={selectedAnswerIndex}
+          setSelectedAnswerIndex={setSelectedAnswerIndex}
+          quizSubmitted={quizSubmitted}
+          isQuizCorrect={isQuizCorrect}
+          handleQuizSubmit={handleQuizSubmit}
+        />
       </div>
     );
   }
@@ -554,7 +467,15 @@ export default function Learn() {
               <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1 ml-4 transition-colors"></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {filteredCareerPaths.map((path) => <RoadmapCard key={path.id} item={path} />)}
+              {filteredCareerPaths.map((path) => (
+                <CourseCard
+                  key={path.id}
+                  item={path}
+                  onSelectTopic={handleSelectTopic}
+                  isAdmin={isAdmin}
+                  onDeleteTopic={(id) => handleAdminSave({ action: 'delete', id })}
+                />
+              ))}
             </div>
           </div>
         )}
@@ -566,7 +487,15 @@ export default function Learn() {
               <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1 ml-4 transition-colors"></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {filteredSkillPaths.map((path) => <RoadmapCard key={path.id} item={path} />)}
+              {filteredSkillPaths.map((path) => (
+                <CourseCard
+                  key={path.id}
+                  item={path}
+                  onSelectTopic={handleSelectTopic}
+                  isAdmin={isAdmin}
+                  onDeleteTopic={(id) => handleAdminSave({ action: 'delete', id })}
+                />
+              ))}
             </div>
           </div>
         )}

@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../middleware/asyncHandler.js';
@@ -194,23 +195,94 @@ export const getMe = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    OAuth Callback Handler
-// @route   GET /api/auth/:provider/callback
-// @access  Public
-export const handleOAuthSuccess = asyncHandler(async (req, res) => {
-  if (!req.user) {
-    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=oauth_failed`);
+/**
+ * Secure manual verification of Firebase Google ID tokens
+ */
+const verifyFirebaseToken = async (idToken) => {
+  // 1. Decode token header to get 'kid' (key ID)
+  const decodedHeader = jwt.decode(idToken, { complete: true });
+  if (!decodedHeader || !decodedHeader.header || !decodedHeader.header.kid) {
+    throw ApiError.badRequest('Invalid Firebase ID token format');
   }
 
-  const user = req.user;
+  const kid = decodedHeader.header.kid;
+
+  // 2. Fetch Google's public certificates dynamically
+  const certRes = await fetch('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com');
+  if (!certRes.ok) {
+    throw ApiError.internal('Failed to retrieve Firebase public certificates');
+  }
+  const publicKeys = await certRes.json();
+
+  const cert = publicKeys[kid];
+  if (!cert) {
+    throw ApiError.unauthorized('Invalid security certificate or expired token signature');
+  }
+
+  // 3. Verify signature and claims (RS256 algorithm)
+  try {
+    const verifiedToken = jwt.verify(idToken, cert, { algorithms: ['RS256'] });
+    return verifiedToken;
+  } catch (err) {
+    throw ApiError.unauthorized(`Token validation failed: ${err.message}`);
+  }
+};
+
+// @desc    Authenticate/Register user via Firebase Auth (Google or Email/Password)
+// @route   POST /api/auth/firebase
+// @access  Public
+export const firebaseLogin = asyncHandler(async (req, res) => {
+  const { idToken, name: bodyName, role: bodyRole, track: bodyTrack } = req.body;
+
+  if (!idToken) {
+    throw ApiError.badRequest('Firebase ID token is required');
+  }
+
+  // Verify the ID token securely against Google's keys
+  const firebaseUser = await verifyFirebaseToken(idToken);
+
+  const email = firebaseUser.email;
+  // Use bodyName as fallback if token claims lack name (common for email/password registration)
+  const name = firebaseUser.name || bodyName || 'Developer';
+  const avatar = firebaseUser.picture || '';
+  const firebaseUid = firebaseUser.sub; // Firebase UID is in 'sub' claim
+
+  if (!email) {
+    throw ApiError.badRequest('Firebase authentication is missing an email address');
+  }
+
+  // Find or create the user in MongoDB
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    // Generate a random placeholder password since Firebase Auth is verified
+    const randomPassword = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+
+    user = await User.create({
+      name,
+      email,
+      password: randomPassword,
+      role: bodyRole || 'student',
+      avatar,
+      track: bodyTrack || 'fullstack',
+    });
+  }
+
   const accessToken = generateAccessToken(user._id, user.role);
   const refreshToken = generateRefreshToken(user._id);
 
+  // Maintain up to 5 active refresh tokens per user
+  if (user.refreshTokens.length >= 5) {
+    user.refreshTokens.shift();
+  }
   user.refreshTokens.push({ token: refreshToken });
   await user.save();
 
   sendTokenCookies(res, accessToken, refreshToken);
 
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-  return res.redirect(`${clientUrl}/dashboard`);
+  return res.status(200).json({
+    success: true,
+    message: 'Logged in successfully via Firebase Auth',
+    user: formatUserDto(user),
+  });
 });
