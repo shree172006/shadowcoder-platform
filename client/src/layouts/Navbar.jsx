@@ -44,6 +44,8 @@ export default function Navbar() {
     { title: 'Job Simulations', path: '/simulations', icon: <Briefcase size={16} /> },
     { title: 'Problem Statements', path: '/problems', icon: <FileCode size={16} /> },
     { title: 'Learn Roadmaps', path: '/learn', icon: <BookOpen size={16} /> },
+    { title: 'Achievements', path: '/achievements', icon: <Award size={16} /> },
+    { title: 'Leaderboard', path: '/leaderboard', icon: <Trophy size={16} /> },
   ];
 
   // Public Links (Shown BEFORE signing in)

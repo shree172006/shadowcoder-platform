@@ -3,6 +3,11 @@ import {
   BookOpen, Code2, Database, Terminal, Layout, Server, PieChart, Layers, FileJson 
 } from 'lucide-react';
 
+import { FRONTEND_COURSE } from '../courses/FrontendCourse.jsx';
+import { BACKEND_COURSE } from '../courses/BackendCourse.jsx';
+import { FULLSTACK_COURSE } from '../courses/FullStackCourse.jsx';
+import { DATA_ANALYTICS_COURSE } from '../courses/DataAnalyticsCourse.jsx';
+
 export const INITIAL_CAREER_PATHS = [
   { id: 'frontend', title: 'Frontend Developer', icon: 'frontend', modules: 9, completed: 3 },
   { id: 'backend', title: 'Backend Developer', icon: 'backend', modules: 5, completed: 2 },
@@ -16,6 +21,21 @@ export const INITIAL_SKILL_PATHS = [
   { id: 'html-css', title: 'HTML & CSS', icon: 'html-css', modules: 10, completed: 10 },
   { id: 'javascript', title: 'JavaScript', icon: 'javascript', modules: 15, completed: 8 },
 ];
+
+export const COURSES_MAP = {
+  frontend: FRONTEND_COURSE,
+  backend: BACKEND_COURSE,
+  fullstack: FULLSTACK_COURSE,
+  'data-analytics': DATA_ANALYTICS_COURSE,
+  react: FRONTEND_COURSE,
+  sql: BACKEND_COURSE,
+  'html-css': FRONTEND_COURSE,
+  javascript: FULLSTACK_COURSE,
+};
+
+export const getCourseById = (courseId) => {
+  return COURSES_MAP[courseId] || FRONTEND_COURSE;
+};
 
 export const renderTopicIcon = (icon) => {
   if (React.isValidElement(icon)) return icon;

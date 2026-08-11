@@ -17,8 +17,11 @@ import Settings from './features/Settings/Settings.jsx';
 // Lazy Loaded Heavy Workspace Routes (Fetched On-Demand for Maximum Speed)
 const SimulationWorkspace = lazy(() => import('./features/JobSimulations/SimulationWorkspace.jsx'));
 const Learn = lazy(() => import('./features/Learn/Learn.jsx'));
+const CourseRoadmapView = lazy(() => import('./features/Learn/views/CourseRoadmapView.jsx'));
+const LessonWorkspaceView = lazy(() => import('./features/Learn/views/LessonWorkspaceView.jsx'));
 const ProblemWorkspace = lazy(() => import('./features/ProblemStatements/ProblemWorkspace.jsx'));
 const AdminPanel = lazy(() => import('./features/Admin/AdminPanel.jsx'));
+const AchievementsPage = lazy(() => import('./features/Achievements/AchievementsPage.jsx'));
 
 const RouteFallback = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400 space-y-3">
@@ -63,8 +66,11 @@ export default function App() {
               <Route path="/simulations" element={<JobSimulations />} />
               <Route path="/task/:id" element={<SimulationWorkspace />} />
               <Route path="/learn" element={<Learn />} />
+              <Route path="/learn/:courseId" element={<CourseRoadmapView />} />
+              <Route path="/learn/:courseId/lesson/:lessonId" element={<LessonWorkspaceView />} />
               <Route path="/problems" element={<ProblemStatements />} />
               <Route path="/problem/:id" element={<ProblemWorkspace />} />
+              <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><GlobalLeaderboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
