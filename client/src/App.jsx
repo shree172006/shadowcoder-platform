@@ -63,13 +63,13 @@ export default function App() {
               
               {/* Authenticated Protected Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/simulations" element={<JobSimulations />} />
-              <Route path="/task/:id" element={<SimulationWorkspace />} />
-              <Route path="/learn" element={<Learn />} />
-              <Route path="/learn/:courseId" element={<CourseRoadmapView />} />
-              <Route path="/learn/:courseId/lesson/:lessonId" element={<LessonWorkspaceView />} />
-              <Route path="/problems" element={<ProblemStatements />} />
-              <Route path="/problem/:id" element={<ProblemWorkspace />} />
+              <Route path="/simulations" element={<ProtectedRoute><JobSimulations /></ProtectedRoute>} />
+              <Route path="/task/:id" element={<ProtectedRoute><SimulationWorkspace /></ProtectedRoute>} />
+              <Route path="/learn" element={<ProtectedRoute><Learn /></ProtectedRoute>} />
+              <Route path="/learn/:courseId" element={<ProtectedRoute><CourseRoadmapView /></ProtectedRoute>} />
+              <Route path="/learn/:courseId/lesson/:lessonId" element={<ProtectedRoute><LessonWorkspaceView /></ProtectedRoute>} />
+              <Route path="/problems" element={<ProtectedRoute><ProblemStatements /></ProtectedRoute>} />
+              <Route path="/problem/:id" element={<ProtectedRoute><ProblemWorkspace /></ProtectedRoute>} />
               <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><GlobalLeaderboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -84,6 +84,15 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* 404 Catch-All */}
+              <Route path="*" element={
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
+                  <h1 className="text-6xl font-black text-slate-300 dark:text-slate-700">404</h1>
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400">Page not found. The route you're looking for doesn't exist.</p>
+                  <a href="/" className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all">Go Home</a>
+                </div>
+              } />
             </Routes>
           </Suspense>
         </main>

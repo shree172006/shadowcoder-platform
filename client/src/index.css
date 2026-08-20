@@ -2,8 +2,20 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Light mode defaults */
 html, body {
-  background-color: #07090e !important;
+  color-scheme: light dark;
+}
+
+/* Dark mode colors scoped to .dark class only */
+html.dark, html.dark body {
+  background-color: #07090e;
   color: #f8fafc;
   color-scheme: dark;
+}
+
+html:not(.dark), html:not(.dark) body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  color-scheme: light;
 }

@@ -175,8 +175,19 @@ export const refreshToken = asyncHandler(async (req, res) => {
       message: 'Access token refreshed',
     });
   } catch (error) {
+    // If the error is already an ApiError we created above, re-throw it directly
+    if (error instanceof ApiError) {
+      clearTokenCookies(res);
+      throw error;
+    }
+    // Only mask JWT-specific errors as session expired
+    if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
+      clearTokenCookies(res);
+      throw ApiError.unauthorized('Session expired. Please log in again.');
+    }
+    // Re-throw unexpected errors (DB failures, etc.) with original context
     clearTokenCookies(res);
-    throw ApiError.unauthorized('Session expired. Please log in again.');
+    throw error;
   }
 });
 

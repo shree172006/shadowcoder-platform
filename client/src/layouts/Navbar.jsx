@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Code, User as UserIcon, Settings, LogOut, ShieldCheck, Sun, Moon, 
-  Terminal, LayoutGrid, Menu, X, Trophy, BookOpen, Briefcase, FileCode, Star
+  Terminal, LayoutGrid, Menu, X, Trophy, BookOpen, Briefcase, FileCode, Star, Award
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -12,6 +12,26 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
+
+  // Close menus on route change
+  useEffect(() => {
+    setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   // Light / Dark Mode State
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -127,7 +147,7 @@ export default function Navbar() {
 
           {/* User Profile (AFTER SIGN IN) vs Sign In CTAs (BEFORE SIGN IN) */}
           {user ? (
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all border border-slate-200 dark:border-slate-800"

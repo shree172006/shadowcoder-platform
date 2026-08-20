@@ -64,6 +64,16 @@ node_modules/
 
 # dotenv environment variables file
 .env
+.env.*
+!.env.example
+
+# Uploads directory
+uploads/
+server/uploads/
+
+# Build artifacts
+dist/
+client/dist/
 
 # dataconnect generated files
 .dataconnect

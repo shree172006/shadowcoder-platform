@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema(
     },
     track: {
       type: String,
-      enum: ['fullstack', 'frontend', 'backend', 'devops'],
+      enum: ['fullstack', 'frontend', 'backend', 'devops', 'data-analytics'],
       default: 'fullstack',
     },
     avatar: {

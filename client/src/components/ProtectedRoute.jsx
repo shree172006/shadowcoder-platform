@@ -29,7 +29,15 @@ export const ProtectedRoute = ({ children, roles = [] }) => {
   }
 
   if (roles.length > 0 && !roles.includes(user?.role)) {
-    return <Navigate to="/unauthorized" replace />;
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 gap-4">
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-500 text-center max-w-md">
+          <p className="font-bold text-sm mb-1">Access Denied</p>
+          <p className="text-xs text-rose-400">Your role ({user?.role}) does not have permission to access this resource.</p>
+        </div>
+        <Navigate to="/dashboard" replace />
+      </div>
+    );
   }
 
   return children;

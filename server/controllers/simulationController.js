@@ -265,19 +265,31 @@ export const submitTicketEvaluation = asyncHandler(async (req, res) => {
     throw ApiError.notFound(`Ticket '${ticketId}' not found in scenario`);
   }
 
+  // Session ownership validation — prevent users from evaluating other users' sessions
+  if (progress.userId.toString() !== req.user._id.toString()) {
+    throw ApiError.forbidden('You do not have permission to evaluate this session');
+  }
+
   // Broadcast live evaluation started event to WebSocket room
   broadcastToScenario(sessionId, 'EVALUATION_STARTED', {
     ticketId,
     timestamp: new Date(),
   });
 
-  // Prepare temp workspace for evaluation
+  // CRITICAL FIX: Copy starter codebase to a per-session temp workspace
+  // This prevents race conditions when multiple users run the same scenario concurrently
   const baseWorkspacePath = scenario.starterCodebasePath;
+  const sessionWorkspacePath = path.resolve(
+    process.cwd(), 'uploads', 'temp', `session_${sessionId}_${Date.now()}`
+  );
 
-  // Apply user modified files onto workspace path if needed
+  // Copy starter codebase to isolated session workspace
+  fs.cpSync(baseWorkspacePath, sessionWorkspacePath, { recursive: true });
+
+  // Apply user modified files onto the ISOLATED session workspace
   if (progress.vfsState && progress.vfsState.size > 0) {
     for (const [relPath, fileContent] of progress.vfsState.entries()) {
-      await writeVfsFile(baseWorkspacePath, relPath, fileContent);
+      await writeVfsFile(sessionWorkspacePath, relPath, fileContent);
     }
   }
 
@@ -291,11 +303,18 @@ export const submitTicketEvaluation = asyncHandler(async (req, res) => {
 
   const evalCmd = scenario.environmentConfig?.testCmd || 'npm test';
 
-  // Run isolated Docker / Sandboxed evaluation
-  const evalResult = await runSandboxedEvaluation(baseWorkspacePath, evalCmd, {
+  // Run isolated Docker / Sandboxed evaluation against the session workspace copy
+  const evalResult = await runSandboxedEvaluation(sessionWorkspacePath, evalCmd, {
     timeoutMs: scenario.environmentConfig?.timeoutMs || 30000,
     onLog: onLogStream,
   });
+
+  // Cleanup: remove temp session workspace after evaluation completes
+  try {
+    fs.rmSync(sessionWorkspacePath, { recursive: true, force: true });
+  } catch (cleanupErr) {
+    console.warn(`[Cleanup Warning]: Failed to remove session workspace: ${cleanupErr.message}`);
+  }
 
   let earnedXp = 0;
   let leveledUp = false;

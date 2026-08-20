@@ -9,17 +9,19 @@ import {
 } from '../controllers/authController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
+import { authLimiter } from '../middleware/rateLimiter.js';
+
 const router = express.Router();
 
-// Email / Password Auth Routes
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+// Email / Password Auth Routes (with Brute-Force Rate Limiting)
+router.post('/register', authLimiter, registerUser);
+router.post('/login', authLimiter, loginUser);
 router.post('/logout', protect, logoutUser);
 router.post('/refresh', refreshToken);
 router.get('/me', protect, getMe);
 
-// Firebase Unified Auth Route
-router.post('/firebase', firebaseLogin);
+// Firebase Unified Auth Route (with Brute-Force Rate Limiting)
+router.post('/firebase', authLimiter, firebaseLogin);
 
 // RBAC Admin Verification Test Route
 router.get('/admin/verify', protect, authorize('admin'), (req, res) => {

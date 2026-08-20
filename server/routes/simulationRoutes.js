@@ -13,6 +13,7 @@ import {
   analyzeSessionCode,
 } from '../controllers/simulationController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
+import { uploadLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -44,6 +45,7 @@ router.post(
   '/scenarios/upload',
   protect,
   authorize('admin'),
+  uploadLimiter,
   upload.single('codebaseZip'),
   uploadScenarioCodebase
 );

@@ -1,29 +1,58 @@
 /**
  * DevTools & Source Code Protection Guard
  * Anti-AI Copy-Paste Protection, Anti-Screenshot Guard, and DevTools Shield.
+ *
+ * NOTE: Monaco Editor and other code workspace elements are EXEMPTED from
+ * copy/paste blocking to preserve editor functionality.
  */
+
+/**
+ * Returns true if the event target is inside a Monaco Editor or workspace container
+ * that requires full clipboard access.
+ */
+const isEditorContext = (target) => {
+  if (!target) return false;
+  const editorSelectors = [
+    '.monaco-editor',
+    '.monaco-mouse-cursor-text',
+    '[class*="monaco"]',
+    '[data-allow-clipboard]',
+    'textarea',
+    'input',
+  ];
+  return editorSelectors.some((sel) => target.closest?.(sel));
+};
+
 export function initDevToolsGuard() {
   if (typeof window === 'undefined') return;
 
-  // 1. Disable Right-Click Context Menu
+  // Skip all protections in development mode for developer experience
+  const isDev = import.meta.env.DEV;
+  if (isDev) return;
+
+  // 1. Disable Right-Click Context Menu (except inside editors)
   document.addEventListener('contextmenu', (e) => {
+    if (isEditorContext(e.target)) return;
     e.preventDefault();
     return false;
   });
 
-  // 2. Block Anti-AI Copy, Cut, and Paste Events across workspace
+  // 2. Block Anti-AI Copy, Cut, and Paste Events (except inside editors & inputs)
   document.addEventListener('copy', (e) => {
+    if (isEditorContext(e.target)) return;
     e.preventDefault();
     if (e.clipboardData) e.clipboardData.setData('text/plain', '[Copy Protection Active: External code copy is disabled on ShadowCoder]');
     return false;
   });
 
   document.addEventListener('cut', (e) => {
+    if (isEditorContext(e.target)) return;
     e.preventDefault();
     return false;
   });
 
   document.addEventListener('paste', (e) => {
+    if (isEditorContext(e.target)) return;
     e.preventDefault();
     return false;
   });

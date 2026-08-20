@@ -80,7 +80,7 @@ const scenarioSchema = new mongoose.Schema(
     },
     targetRole: {
       type: String,
-      enum: ['fullstack', 'frontend', 'backend', 'devops'],
+      enum: ['fullstack', 'frontend', 'backend', 'devops', 'data-analytics'],
       default: 'fullstack',
     },
     requiredTier: {
