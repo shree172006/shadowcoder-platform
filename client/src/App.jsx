@@ -26,22 +26,12 @@ const AchievementsPage = lazy(() => import('./features/Achievements/Achievements
 const RouteFallback = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400 space-y-3">
     <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-    <span className="text-xs font-mono font-bold tracking-wider text-slate-500">Loading Workspace Chunk...</span>
+    <span className="text-xs font-mono font-bold tracking-wider text-slate-500">Loading Workspace...</span>
   </div>
 );
 
 function RootRouteController() {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400 space-y-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-        <span className="text-xs font-mono font-bold tracking-wider text-slate-500">Initializing Session...</span>
-      </div>
-    );
-  }
-
+  const { user } = useAuth();
   // BEFORE Sign In -> Landing Page; AFTER Sign In -> Developer Dashboard
   return user ? <Dashboard /> : <LandingPage />;
 }
@@ -55,21 +45,23 @@ export default function App() {
         <main>
           <Suspense fallback={<RouteFallback />}>
             <Routes>
+              {/* Public Discovery Routes (0ms First Paint, Open for All Visitors) */}
               <Route path="/landing" element={<LandingPage />} />
               <Route path="/login" element={<AuthPage />} />
               <Route path="/signup" element={<AuthPage />} />
-              
               <Route path="/" element={<RootRouteController />} />
-              
-              {/* Authenticated Protected Routes */}
+
+              {/* Browseable Catalog Routes (Anyone can explore available challenges & roadmaps) */}
+              <Route path="/simulations" element={<JobSimulations />} />
+              <Route path="/problems" element={<ProblemStatements />} />
+              <Route path="/learn" element={<Learn />} />
+              <Route path="/learn/:courseId" element={<CourseRoadmapView />} />
+
+              {/* Protected Execution Workspaces (Requires Login -> Seamless Redirect) */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/simulations" element={<ProtectedRoute><JobSimulations /></ProtectedRoute>} />
               <Route path="/task/:id" element={<ProtectedRoute><SimulationWorkspace /></ProtectedRoute>} />
-              <Route path="/learn" element={<ProtectedRoute><Learn /></ProtectedRoute>} />
-              <Route path="/learn/:courseId" element={<ProtectedRoute><CourseRoadmapView /></ProtectedRoute>} />
-              <Route path="/learn/:courseId/lesson/:lessonId" element={<ProtectedRoute><LessonWorkspaceView /></ProtectedRoute>} />
-              <Route path="/problems" element={<ProtectedRoute><ProblemStatements /></ProtectedRoute>} />
               <Route path="/problem/:id" element={<ProtectedRoute><ProblemWorkspace /></ProtectedRoute>} />
+              <Route path="/learn/:courseId/lesson/:lessonId" element={<ProtectedRoute><LessonWorkspaceView /></ProtectedRoute>} />
               <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><GlobalLeaderboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

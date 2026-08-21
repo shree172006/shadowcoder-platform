@@ -11,20 +11,46 @@ export const apiClient = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
+  // Timeout controller (default 8s or custom timeout from options)
+  const timeoutMs = options.timeout || 8000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   const config = {
     ...options,
     headers: defaultHeaders,
     credentials: 'include', // Always transmit HttpOnly cookies
+    signal: options.signal || controller.signal,
   };
 
   if (config.body && typeof config.body === 'object' && !(config.body instanceof FormData)) {
     config.body = JSON.stringify(config.body);
   }
 
-  let response = await fetch(url, config);
+  let response;
+  try {
+    response = await fetch(url, config);
+  } catch (fetchErr) {
+    clearTimeout(timeoutId);
+    if (fetchErr.name === 'AbortError') {
+      const timeoutError = new Error('Request timed out. Backend service may be waking up.');
+      timeoutError.status = 408;
+      throw timeoutError;
+    }
+    throw fetchErr;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   // If unauthorized (401), attempt to refresh token once (except for auth endpoints)
-  if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/refresh')) {
+  const isAuthEndpoint =
+    endpoint.includes('/auth/login') ||
+    endpoint.includes('/auth/register') ||
+    endpoint.includes('/auth/refresh') ||
+    endpoint.includes('/auth/firebase') ||
+    endpoint.includes('/auth/me');
+
+  if (response.status === 401 && !isAuthEndpoint) {
     try {
       const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',
@@ -37,7 +63,7 @@ export const apiClient = async (endpoint, options = {}) => {
         response = await fetch(url, config);
       }
     } catch (refreshErr) {
-      console.error('Failed to auto-refresh session', refreshErr);
+      console.warn('Failed to auto-refresh session', refreshErr);
     }
   }
 

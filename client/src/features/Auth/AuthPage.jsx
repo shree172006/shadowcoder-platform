@@ -79,7 +79,7 @@ export default function AuthPage() {
       } else {
         await login(formData.email, formData.password);
       }
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
       let errMsg = err.message || 'Authentication failed. Please check your details.';

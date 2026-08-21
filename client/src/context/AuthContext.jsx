@@ -15,25 +15,33 @@ const getStoredUser = () => {
 };
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(getStoredUser);
-  const [loading, setLoading] = useState(true);
+  const initialUser = getStoredUser();
+  const [user, setUser] = useState(initialUser);
+  // Zero-millisecond first paint: do not block guest visitors who have no session
+  const [loading, setLoading] = useState(false);
 
-  // Restore & sync user session on application load
+  // Background non-blocking session sync with 3.5s timeout
   const fetchMe = useCallback(async () => {
     try {
-      const data = await apiClient('/auth/me');
+      const data = await apiClient('/auth/me', { timeout: 3500 });
       if (data && data.user) {
         setUser(data.user);
         localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.user));
       }
     } catch (err) {
-      // Keep existing stored user on network errors or offline
+      // If server explicitly returned 401, clear invalidated session
+      if (err.status === 401) {
+        setUser(null);
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+      }
+      // On network timeout or cold start, preserve cached user for offline tolerance
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    // Only verify backend session if there was a previous user session or on initial mount
     fetchMe();
   }, [fetchMe]);
 
@@ -77,7 +85,7 @@ export function AuthProvider({ children }) {
       }
       await apiClient('/auth/logout', { method: 'POST' });
     } catch (err) {
-      console.error('Logout error:', err);
+      console.warn('Logout warning:', err.message);
     } finally {
       setUser(null);
       localStorage.removeItem(SESSION_STORAGE_KEY);
