@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, ArrowRight, BookOpen, Code2, CheckCircle2, XCircle, 
@@ -11,19 +11,35 @@ export default function LessonWorkspaceView() {
   const { courseId, lessonId } = useParams();
   const navigate = useNavigate();
 
-  const course = getCourseById(courseId);
-  const nodes = course.nodes || [];
-  const currentIndex = nodes.findIndex((n) => n.id === lessonId);
-  const currentNode = nodes[currentIndex] || nodes[0];
-  const lessonData = currentNode?.data || {};
+  // Dynamic course resolution supporting browser back/forward navigation
+  const course = useMemo(() => getCourseById(courseId), [courseId]);
+  const nodes = useMemo(() => course.nodes || [], [course]);
+
+  const currentIndex = useMemo(() => {
+    if (!nodes.length) return 0;
+    const idx = nodes.findIndex((n) => n.id === lessonId);
+    return idx >= 0 ? idx : 0;
+  }, [nodes, lessonId]);
+
+  const currentNode = nodes[currentIndex] || nodes[0] || {};
+  const lessonData = currentNode?.data || currentNode || {};
 
   const prevLesson = currentIndex > 0 ? nodes[currentIndex - 1] : null;
   const nextLesson = currentIndex < nodes.length - 1 ? nodes[currentIndex + 1] : null;
 
-  // Quiz state
+  // Quiz & Copy State
   const [selectedOption, setSelectedOption] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Reset quiz state whenever lessonId or courseId changes in the URL (Browser Back/Forward support)
+  useEffect(() => {
+    setSelectedOption(null);
+    setIsSubmitted(false);
+    setCopied(false);
+    // Scroll to top on lesson switch
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [courseId, lessonId]);
 
   const testQuestion = lessonData.testQuestion || {
     question: 'What is the primary objective of this module?',
@@ -49,7 +65,7 @@ export default function LessonWorkspaceView() {
         {/* BREADCRUMB NAVIGATION */}
         <div className="flex items-center justify-between">
           <Link
-            to={`/learn/${courseId}`}
+            to={`/learn/${course.id || courseId}`}
             className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
           >
             <ArrowLeft size={16} /> Back to {course.title} Roadmap
@@ -84,11 +100,11 @@ export default function LessonWorkspaceView() {
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-            {lessonData.label}
+            {lessonData.label || 'Lesson Overview'}
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-            {lessonData.overview}
+            {lessonData.overview || 'Explore the technical overview and interactive code playbook below.'}
           </p>
 
           {/* Tools & Tech Stack Badges */}
@@ -113,7 +129,7 @@ export default function LessonWorkspaceView() {
               </div>
               <button
                 onClick={handleCopyCode}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all cursor-pointer"
               >
                 {copied ? <><Check size={14} className="text-emerald-400" /> Copied!</> : <><Copy size={14} /> Copy Snippet</>}
               </button>
@@ -213,9 +229,7 @@ export default function LessonWorkspaceView() {
           {prevLesson ? (
             <button
               onClick={() => {
-                setSelectedOption(null);
-                setIsSubmitted(false);
-                navigate(`/learn/${courseId}/lesson/${prevLesson.id}`);
+                navigate(`/learn/${course.id || courseId}/lesson/${prevLesson.id}`);
               }}
               className="px-5 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-2 cursor-pointer shadow-sm"
             >
@@ -226,9 +240,7 @@ export default function LessonWorkspaceView() {
           {nextLesson ? (
             <button
               onClick={() => {
-                setSelectedOption(null);
-                setIsSubmitted(false);
-                navigate(`/learn/${courseId}/lesson/${nextLesson.id}`);
+                navigate(`/learn/${course.id || courseId}/lesson/${nextLesson.id}`);
               }}
               className="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2 cursor-pointer"
             >
@@ -236,7 +248,7 @@ export default function LessonWorkspaceView() {
             </button>
           ) : (
             <Link
-              to={`/learn/${courseId}`}
+              to={`/learn/${course.id || courseId}`}
               className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/20 flex items-center gap-2"
             >
               Finish Roadmap <CheckCircle2 size={16} />
