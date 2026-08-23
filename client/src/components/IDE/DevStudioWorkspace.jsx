@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Folder, Search, Cpu, Settings, Play, CheckCircle2, 
-  TerminalSquare, Send, Sparkles, ChevronLeft, ChevronRight, Layers, ShieldCheck 
+  TerminalSquare, Send, Sparkles, ChevronLeft, ChevronRight, Layers, ShieldCheck, Brain 
 } from 'lucide-react';
 import FileTreeExplorer from './FileTreeExplorer.jsx';
 import MonacoEditorPane from './MonacoEditorPane.jsx';
 import IntegratedTerminal from './IntegratedTerminal.jsx';
 import VSCodeStatusBar from './VSCodeStatusBar.jsx';
+import AiReviewModal from './AiReviewModal.jsx';
 
 export default function DevStudioWorkspace({
   title = 'Project Workspace',
@@ -40,6 +41,7 @@ export default function DevStudioWorkspace({
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const [terminalHeight, setTerminalHeight] = useState(220);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   // Sync initialFiles if props change
   useEffect(() => {
@@ -155,6 +157,14 @@ export default function DevStudioWorkspace({
 
         <div className="flex items-center gap-2">
           {extraTopRightActions}
+
+          {/* AI Staff Review Button */}
+          <button
+            onClick={() => setIsAiModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-300 hover:bg-purple-600 hover:text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+          >
+            <Sparkles size={13} className="text-purple-400" /> AI Review
+          </button>
 
           {/* Quick Run Test Suite Button */}
           <button
@@ -309,6 +319,19 @@ export default function DevStudioWorkspace({
         warningCount={0}
         onToggleTerminal={() => setIsTerminalOpen((prev) => !prev)}
       />
+
+      {/* AI STAFF REVIEW MODAL */}
+      {isAiModalOpen && (
+        <AiReviewModal
+          isOpen={isAiModalOpen}
+          onClose={() => setIsAiModalOpen(false)}
+          files={files}
+          scenarioTitle={title}
+          scenarioRole={subtitle}
+          difficulty="Senior"
+          testResults={evaluationResults}
+        />
+      )}
 
     </div>
   );

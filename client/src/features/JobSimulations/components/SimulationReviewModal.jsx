@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
   CheckCircle, AlertTriangle, ShieldCheck, Terminal, Award, 
-  Download, Sparkles, X, ArrowRight, RefreshCw 
+  Download, Sparkles, X, ArrowRight, RefreshCw, Brain 
 } from 'lucide-react';
 import GitHubExportModal from '../../../components/IDE/GitHubExportModal.jsx';
+import AiReviewModal from '../../../components/IDE/AiReviewModal.jsx';
 
 // Inline GitHub SVG Icon
 const GithubIcon = ({ size = 16, className = '' }) => (
@@ -24,6 +25,7 @@ export default function SimulationReviewModal({
   difficulty = 'Mid-Level',
 }) {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isAiReviewModalOpen, setIsAiReviewModalOpen] = useState(false);
 
   if (!isOpen || !scorecard) return null;
 
@@ -37,7 +39,7 @@ export default function SimulationReviewModal({
     : { title: 'Porter (Apprentice)', badge: '📦 Porter Tier', color: 'text-slate-400 border-slate-700 bg-slate-800/40' };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in select-none font-sans">
       <div className="bg-[#0f172a] text-slate-100 p-6 sm:p-8 rounded-3xl border-2 border-slate-800 max-w-3xl w-full shadow-2xl space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
         
         {/* HEADER SCORE BANNER */}
@@ -82,26 +84,35 @@ export default function SimulationReviewModal({
           </button>
         </div>
 
-        {/* 1-CLICK GITHUB EXPORT & LINKEDIN VIRAL BANNER (If Passed) */}
-        {isPass && (
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/60 via-purple-950/40 to-slate-900 border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-indigo-600/10">
-            <div>
-              <span className="text-xs font-black text-indigo-300 flex items-center gap-1.5 uppercase tracking-wider">
-                <Sparkles size={16} /> Verified Implementation Ready!
-              </span>
-              <p className="text-slate-300 text-xs mt-0.5">
-                Export your solved repository with audit badges for recruiters or share to LinkedIn.
-              </p>
-            </div>
-
-            <button
-              onClick={() => setIsExportModalOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all hover:scale-105 shrink-0 cursor-pointer"
-            >
-              <GithubIcon size={16} /> Export to My GitHub
-            </button>
+        {/* 1-CLICK GITHUB EXPORT & AI REVIEW BANNER */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/60 via-purple-950/40 to-slate-900 border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-indigo-600/10">
+          <div>
+            <span className="text-xs font-black text-indigo-300 flex items-center gap-1.5 uppercase tracking-wider">
+              <Brain size={16} className="text-purple-400" /> AI Staff Review & Verified Export
+            </span>
+            <p className="text-slate-300 text-xs mt-0.5">
+              Request line-by-line Gemini AI review or export your verified repository to GitHub.
+            </p>
           </div>
-        )}
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => setIsAiReviewModalOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all hover:scale-105 shrink-0 cursor-pointer"
+            >
+              <Sparkles size={14} /> AI Code Review
+            </button>
+
+            {isPass && (
+              <button
+                onClick={() => setIsExportModalOpen(true)}
+                className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all hover:scale-105 shrink-0 cursor-pointer"
+              >
+                <GithubIcon size={14} /> Export Repo
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* STAFF ENGINEERING METRICS GRID */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -173,14 +184,12 @@ export default function SimulationReviewModal({
           </button>
 
           <div className="flex items-center gap-2">
-            {isPass && (
-              <button
-                onClick={() => setIsExportModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/20"
-              >
-                <GithubIcon size={14} /> Export to GitHub
-              </button>
-            )}
+            <button
+              onClick={() => setIsAiReviewModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-purple-600/20"
+            >
+              <Sparkles size={14} /> AI Review
+            </button>
             <button
               onClick={onClose}
               className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors cursor-pointer"
@@ -201,6 +210,17 @@ export default function SimulationReviewModal({
         difficulty={difficulty}
         files={files}
         scorecard={scorecard}
+      />
+
+      {/* AI CODE REVIEW MODAL */}
+      <AiReviewModal
+        isOpen={isAiReviewModalOpen}
+        onClose={() => setIsAiReviewModalOpen(false)}
+        files={files}
+        scenarioTitle={scenarioTitle}
+        scenarioRole={scenarioRole}
+        difficulty={difficulty}
+        testResults={scorecard}
       />
     </div>
   );

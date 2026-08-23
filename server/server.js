@@ -12,6 +12,7 @@ import { initializeSocket } from './socket/socketManager.js';
 import authRoutes from './routes/authRoutes.js';
 import simulationRoutes from './routes/simulationRoutes.js';
 import learnRoutes from './routes/learnRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 import errorMiddleware from './middleware/errorMiddleware.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 
@@ -83,6 +84,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/simulations', simulationRoutes);
 app.use('/api/learn', learnRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health Check Endpoint (for load balancers, uptime monitors, k8s probes)
 app.get('/api/health', (req, res) => {
