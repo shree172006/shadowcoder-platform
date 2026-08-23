@@ -272,9 +272,11 @@ export default function SimulationWorkspace() {
   const [scorecard, setScorecard] = useState(null);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState([]);
+  const [workingFiles, setWorkingFiles] = useState(scenario.files);
 
   // Evaluation Handler (Evaluates user's live workspace files)
   const handleRunEvaluation = async (currentFiles) => {
+    setWorkingFiles(currentFiles);
     setIsEvaluating(true);
     setTerminalLogs((prev) => [
       ...prev,
@@ -380,6 +382,10 @@ export default function SimulationWorkspace() {
             onClose={() => setIsReviewOpen(false)}
             scorecard={scorecard}
             onRetry={() => setIsReviewOpen(false)}
+            files={workingFiles || scenario.files}
+            scenarioTitle={scenario.title}
+            scenarioRole={scenario.role}
+            difficulty={scenario.difficulty}
           />
         )}
 
