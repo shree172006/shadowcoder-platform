@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { 
   Trophy, Code2, Zap, Award, CheckCircle2, ShieldCheck, Flame, Star, 
-  Sparkles, Sword, Shield, Brain, Activity, Compass, Target, ChevronRight, Lock, User
+  Sparkles, Sword, Shield, Brain, Activity, Compass, Target, ChevronRight, 
+  Lock, User, Crown, RefreshCw, X 
 } from 'lucide-react';
-import { BADGES_CATALOG, RARITY_TIERS } from '../Achievements/badgesCatalog';
+import { BADGES_CATALOG, RARITY_TIERS } from '../Achievements/badgesCatalog.js';
 import BadgeIcon from '../Achievements/BadgeIcon.jsx';
 
 /**
@@ -49,15 +50,15 @@ export default function Profile() {
     let animationFrameId;
 
     const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      canvas.width = canvas.offsetWidth || window.innerWidth;
+      canvas.height = canvas.offsetHeight || window.innerHeight;
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
     const particles = Array.from({ length: 25 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
+      x: Math.random() * (canvas.width || 800),
+      y: Math.random() * (canvas.height || 600),
       radius: Math.random() * 2 + 1,
       dx: (Math.random() - 0.5) * 0.6,
       dy: (Math.random() - 0.5) * 0.6,
