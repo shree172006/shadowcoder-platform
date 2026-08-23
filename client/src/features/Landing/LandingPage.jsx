@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Sparkles, Briefcase, FileCode, BookOpen, Trophy, ArrowRight, ShieldCheck, 
   Terminal, Code2, Cpu, CheckCircle2, Zap, Layout, Server, Layers, PieChart, Star, 
-  Play, Folder, ChevronRight, ExternalLink 
+  Play, Folder, ChevronRight, ExternalLink, RotateCcw, CornerDownLeft 
 } from 'lucide-react';
 
 const CAREER_TRACKS = [
@@ -20,13 +20,8 @@ const FEATURES = [
   { icon: <Trophy className="text-purple-400" size={24} />, title: '1-Click GitHub Exporter', desc: 'Export verified repository code with recruiter badges and LinkedIn proof of work.' },
 ];
 
-export default function LandingPage() {
-  const [activeFile, setActiveFile] = useState('src/payment.js');
-  const [isRunning, setIsRunning] = useState(false);
-  const [testOutput, setTestOutput] = useState('Type "npm test" or click "Run Sandbox" above to execute.');
-
-  const sampleFiles = {
-    'src/payment.js': `// Payment Processing Service - Thread-Safe Concurrency
+const INITIAL_DEMO_FILES = {
+  'src/payment.js': `// Payment Processing Service - Thread-Safe Concurrency
 import { Mutex } from './utils/mutex.js';
 
 const lock = new Mutex();
@@ -42,7 +37,7 @@ export async function processTransaction(cartId, amount) {
     release();
   }
 }`,
-    'src/utils/mutex.js': `// Mutex Synchronization Primitive
+  'src/utils/mutex.js': `// Mutex Synchronization Primitive
 export class Mutex {
   #locked = false;
   #queue = [];
@@ -67,16 +62,123 @@ export class Mutex {
     }
   }
 }`,
+};
+
+export default function LandingPage() {
+  const [demoFiles, setDemoFiles] = useState(INITIAL_DEMO_FILES);
+  const [activeFile, setActiveFile] = useState('src/payment.js');
+  const [isRunning, setIsRunning] = useState(false);
+  
+  // Interactive CLI State
+  const [cliInput, setCliInput] = useState('');
+  const [terminalHistory, setTerminalHistory] = useState([
+    { type: 'system', text: 'DevStudio Interactive Sandbox Terminal v1.0.0' },
+    { type: 'system', text: 'Type "npm test", "node src/payment.js", or click "Run Sandbox (Ctrl+Enter)" to execute.' },
+  ]);
+
+  const terminalEndRef = useRef(null);
+  const terminalInputRef = useRef(null);
+
+  const executeCommand = (rawCmd) => {
+    const cmd = rawCmd.trim().toLowerCase();
+    if (!cmd) return;
+
+    setTerminalHistory((prev) => [
+      ...prev,
+      { type: 'input', text: `devtier:~/workspace$ ${rawCmd}` }
+    ]);
+
+    if (cmd === 'clear' || cmd === 'cls') {
+      setTerminalHistory([]);
+      return;
+    }
+
+    if (cmd === 'help') {
+      setTerminalHistory((prev) => [
+        ...prev,
+        { type: 'output', text: 'Available commands: npm test, npm run test, node src/payment.js, ls, cat <file>, clear' }
+      ]);
+      return;
+    }
+
+    if (cmd === 'ls') {
+      setTerminalHistory((prev) => [
+        ...prev,
+        { type: 'output', text: Object.keys(demoFiles).join('   ') }
+      ]);
+      return;
+    }
+
+    if (cmd.startsWith('cat ')) {
+      const target = cmd.replace('cat ', '').trim();
+      const content = demoFiles[target];
+      if (content) {
+        setTerminalHistory((prev) => [
+          ...prev,
+          { type: 'output', text: content }
+        ]);
+      } else {
+        setTerminalHistory((prev) => [
+          ...prev,
+          { type: 'error', text: `cat: ${target}: No such file or directory` }
+        ]);
+      }
+      return;
+    }
+
+    if (cmd.includes('test') || cmd.includes('run') || cmd.includes('node')) {
+      setIsRunning(true);
+      setTerminalHistory((prev) => [
+        ...prev,
+        { type: 'info', text: '⚡ Spawning isolated sandbox test runner across 50 concurrent transactions...' }
+      ]);
+
+      setTimeout(() => {
+        setIsRunning(false);
+        setTerminalHistory((prev) => [
+          ...prev,
+          { type: 'success', text: '✓ PASS: tests/payment.test.js (50/50 concurrent threads synchronized without collision).' },
+          { type: 'success', text: '✓ AST Code Score: 98/100 (Hunter Rank: Pro Hunter Apex)' },
+          { type: 'system', text: 'Status: Ready for production deployment.' }
+        ]);
+      }, 700);
+      return;
+    }
+
+    // Default unknown command
+    setTerminalHistory((prev) => [
+      ...prev,
+      { type: 'error', text: `bash: ${rawCmd}: command not found. Type "npm test" or "help".` }
+    ]);
   };
 
   const handleRunDemo = () => {
-    setIsRunning(true);
-    setTestOutput('Executing sandbox test runner on 50 concurrent transactions...');
-    setTimeout(() => {
-      setIsRunning(false);
-      setTestOutput('✓ PASS: All 50 concurrent transactions synchronized successfully without collision (100% Pass Rate). Score: 98/100 (Pro Hunter Apex).');
-    }, 1000);
+    executeCommand('npm test');
   };
+
+  const handleTerminalSubmit = (e) => {
+    e.preventDefault();
+    if (!cliInput.trim()) return;
+    executeCommand(cliInput);
+    setCliInput('');
+  };
+
+  // Bind Global Ctrl+Enter / Cmd+Enter Shortcut
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleRunDemo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [demoFiles]);
+
+  // Auto-scroll terminal to bottom
+  useEffect(() => {
+    terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [terminalHistory]);
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 font-sans transition-colors duration-300 overflow-hidden select-none">
@@ -131,27 +233,37 @@ export class Mutex {
               <span className="ml-2 font-bold text-white">DevStudio IDE • Simulation Sandbox</span>
             </div>
 
-            <button
-              onClick={handleRunDemo}
-              disabled={isRunning}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md cursor-pointer transition-all hover:scale-105"
-            >
-              {isRunning ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Play size={12} className="fill-white" />}
-              Run Sandbox (Ctrl+Enter)
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setDemoFiles(INITIAL_DEMO_FILES)}
+                title="Reset code"
+                className="p-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <RotateCcw size={12} />
+              </button>
+
+              <button
+                onClick={handleRunDemo}
+                disabled={isRunning}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md cursor-pointer transition-all hover:scale-105"
+              >
+                {isRunning ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Play size={12} className="fill-white" />}
+                Run Sandbox (Ctrl+Enter)
+              </button>
+            </div>
           </div>
 
           {/* IDE Canvas */}
-          <div className="grid grid-cols-1 md:grid-cols-4 min-h-[300px]">
-            {/* Sidebar */}
+          <div className="grid grid-cols-1 md:grid-cols-4 min-h-[380px]">
+            {/* Sidebar File Explorer */}
             <div className="p-3 bg-[#090d14] border-r border-slate-800 space-y-1">
               <span className="text-[10px] font-bold uppercase text-slate-500 block mb-2">Explorer</span>
-              {Object.keys(sampleFiles).map((file) => (
+              {Object.keys(demoFiles).map((file) => (
                 <div
                   key={file}
                   onClick={() => setActiveFile(file)}
                   className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${
-                    activeFile === file ? 'bg-indigo-600/30 text-white font-bold' : 'text-slate-400 hover:bg-slate-800'
+                    activeFile === file ? 'bg-indigo-600/30 text-white font-bold border-l-2 border-indigo-500' : 'text-slate-400 hover:bg-slate-800'
                   }`}
                 >
                   <Code2 size={13} className="text-cyan-400" />
@@ -160,21 +272,85 @@ export class Mutex {
               ))}
             </div>
 
-            {/* Code View */}
-            <div className="md:col-span-3 bg-[#07090e] p-4 flex flex-col justify-between overflow-x-auto">
-              <pre className="text-slate-200 leading-relaxed font-mono text-xs overflow-x-auto">
-                <code>{sampleFiles[activeFile]}</code>
-              </pre>
-
-              {/* Mini Terminal Output */}
-              <div className="mt-4 p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] space-y-1">
-                <span className="text-indigo-400 font-bold flex items-center gap-1">
-                  <Terminal size={12} /> devtier:~/workspace$
-                </span>
-                <p className={testOutput.includes('PASS') ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
-                  {testOutput}
-                </p>
+            {/* Editable Code View & Terminal */}
+            <div className="md:col-span-3 bg-[#07090e] p-4 flex flex-col justify-between overflow-hidden">
+              
+              {/* Editable Code Textarea */}
+              <div className="flex-1 overflow-y-auto">
+                <textarea
+                  value={demoFiles[activeFile]}
+                  onChange={(e) => setDemoFiles((prev) => ({ ...prev, [activeFile]: e.target.value }))}
+                  rows={9}
+                  className="w-full bg-transparent text-slate-200 leading-relaxed font-mono text-xs focus:outline-none resize-none"
+                  spellCheck="false"
+                />
               </div>
+
+              {/* REAL INTERACTIVE CLI TERMINAL */}
+              <div className="mt-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 text-[11px] font-mono space-y-2">
+                <div className="flex items-center justify-between border-b border-slate-850 pb-1.5 text-slate-400 text-[10px]">
+                  <span className="text-indigo-400 font-bold flex items-center gap-1">
+                    <Terminal size={12} /> Interactive CLI Shell
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => executeCommand('npm test')}
+                      className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 transition-colors cursor-pointer"
+                    >
+                      npm test
+                    </button>
+                    <button
+                      onClick={() => setTerminalHistory([])}
+                      className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 transition-colors cursor-pointer"
+                    >
+                      clear
+                    </button>
+                  </div>
+                </div>
+
+                {/* History Output */}
+                <div className="max-h-[110px] overflow-y-auto space-y-1 custom-scrollbar">
+                  {terminalHistory.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className={`leading-relaxed ${
+                        item.type === 'input'
+                          ? 'text-indigo-300 font-bold'
+                          : item.type === 'success'
+                          ? 'text-emerald-400 font-bold'
+                          : item.type === 'error'
+                          ? 'text-rose-400'
+                          : item.type === 'info'
+                          ? 'text-amber-300'
+                          : 'text-slate-400'
+                      }`}
+                    >
+                      {item.text}
+                    </div>
+                  ))}
+                  <div ref={terminalEndRef} />
+                </div>
+
+                {/* Command Input Form */}
+                <form onSubmit={handleTerminalSubmit} className="flex items-center gap-2 pt-1 border-t border-slate-900">
+                  <span className="text-indigo-400 font-bold shrink-0">devtier:~/workspace$</span>
+                  <input
+                    ref={terminalInputRef}
+                    type="text"
+                    value={cliInput}
+                    onChange={(e) => setCliInput(e.target.value)}
+                    placeholder="npm test"
+                    className="w-full bg-transparent text-white focus:outline-none text-[11px] placeholder-slate-600"
+                  />
+                  <button
+                    type="submit"
+                    className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer shrink-0"
+                  >
+                    <CornerDownLeft size={12} />
+                  </button>
+                </form>
+              </div>
+
             </div>
           </div>
         </div>
