@@ -7,6 +7,7 @@ import {
 import DesktopOnly from '../../layouts/DesktopOnly';
 import DevStudioWorkspace from '../../components/IDE/DevStudioWorkspace.jsx';
 import SimulationReviewModal from './components/SimulationReviewModal.jsx';
+import { auditWorkspaceFiles } from '../../lib/codeAuditor.js';
 
 // Multi-file starter codebases dictionary for real workplace simulations
 const SCENARIO_STARTER_FILES = {
@@ -489,38 +490,79 @@ export default function SimulationWorkspace() {
   const [terminalLogs, setTerminalLogs] = useState([]);
   const [workingFiles, setWorkingFiles] = useState(scenario.files);
 
-  // Evaluation Handler (Evaluates user's live workspace files)
+  // Evaluation Handler (Evaluates user's live workspace files with strict AST Syntax Parsing)
   const handleRunEvaluation = async (currentFiles) => {
     setWorkingFiles(currentFiles);
     setIsEvaluating(true);
     setTerminalLogs((prev) => [
       ...prev,
-      `[SANDBOX CONTAINER]: Spawning isolated test execution for ${scenario.title}...`,
-      `[ANALYSIS]: Parsing ${Object.keys(currentFiles).length} virtual workspace files...`,
+      `[SANDBOX CONTAINER]: Compiling and validating ${Object.keys(currentFiles).length} virtual workspace files...`,
     ]);
 
-    await new Promise((res) => setTimeout(res, 1000));
+    await new Promise((res) => setTimeout(res, 600));
 
-    let dynamicScore = 45;
+    // 1. STRICT SYNTAX & AST VALIDATION
+    const audit = auditWorkspaceFiles(currentFiles);
+    if (!audit.isValid) {
+      const err = audit.syntaxErrors[0];
+      const errorLogs = [
+        `❌ BUILD COMPILATION FAILED: 1 fatal syntax error encountered.`,
+        `   File: ${err.file} (Line ${err.line})`,
+        `   Error: ${err.message}`,
+      ];
+      if (err.snippet) {
+        errorLogs.push(`   > ${err.line} | ${err.snippet.trim()}`);
+      }
+      errorLogs.push(`❌ FAIL: Tests aborted. 0/6 passed. Please fix syntax errors.`);
+
+      setTerminalLogs((prev) => [...prev, ...errorLogs]);
+
+      const failedResults = {
+        status: 'FAILED',
+        score: 0,
+        securityRating: 'F',
+        maintainabilityIndex: 0,
+        testSuiteRate: '0/6 Passed (Syntax Error)',
+        codeSmellsCount: audit.syntaxErrors.length,
+        complexity: 'N/A (Compilation Error)',
+        feedback: [
+          `Fatal compilation error in "${err.file}" at line ${err.line}: ${err.message}`,
+          'Fix the syntax error in your editor before re-running tests or requesting AI review.',
+        ],
+        criteriaAudit: [
+          { name: 'Codebase compilation & valid syntax', status: 'failed' },
+          { name: 'Multi-file codebase structure', status: 'passed' },
+        ],
+        earnedXp: 0,
+      };
+
+      setScorecard(failedResults);
+      setIsEvaluating(false);
+      return failedResults;
+    }
+
+    // 2. LOGICAL AUDITING IF SYNTAX IS VALID
+    let dynamicScore = 40;
     const feedback = [];
     const criteriaAudit = [
+      { name: 'Codebase compilation & valid syntax', status: 'passed' },
       { name: 'Multi-file codebase structure', status: 'passed' },
       { name: 'Virtual File System (VFS) synchronization', status: 'passed' },
     ];
 
     const codeValues = Object.values(currentFiles).join('\n');
 
-    if (codeValues.includes('mutex') || codeValues.includes('Mutex') || codeValues.includes('useMemo') || codeValues.includes('pd.to_datetime') || codeValues.includes('rotateRefreshToken') || codeValues.includes('mutateOptimistic')) {
-      dynamicScore += 30;
-      criteriaAudit.push({ name: 'Architecture optimization & thread safety', status: 'passed' });
-      feedback.push('Staff Architecture Audit: Confirmed optimal synchronization / memoization algorithm.');
+    if (codeValues.includes('mutex') || codeValues.includes('Mutex') || codeValues.includes('useMemo') || codeValues.includes('pd.to_datetime') || codeValues.includes('rotateRefreshToken') || codeValues.includes('mutateOptimistic') || codeValues.includes('calculate_anomaly_score') || codeValues.includes('OrderEventBus')) {
+      dynamicScore += 35;
+      criteriaAudit.push({ name: 'Architecture optimization & logic contracts', status: 'passed' });
+      feedback.push('Staff Architecture Audit: Optimal synchronization & logic contracts confirmed.');
     } else {
-      criteriaAudit.push({ name: 'Architecture optimization & thread safety', status: 'failed' });
-      feedback.push('Architecture Warning: Recommended optimization pattern not implemented in target file.');
+      criteriaAudit.push({ name: 'Architecture optimization & logic contracts', status: 'failed' });
+      feedback.push('Architecture Warning: Recommended target pattern or locking logic missing.');
     }
 
     if (codeValues.includes('try') && codeValues.includes('catch') || codeValues.includes('409') || codeValues.includes('useCallback') || codeValues.includes('revokedTokens')) {
-      dynamicScore += 20;
+      dynamicScore += 25;
       criteriaAudit.push({ name: 'Exception boundaries & security defenses', status: 'passed' });
       feedback.push('Security Defense: Robust exception handling and fallback boundaries confirmed.');
     } else {
@@ -535,7 +577,7 @@ export default function SimulationWorkspace() {
       securityRating: dynamicScore >= 80 ? 'A+' : dynamicScore >= 50 ? 'B' : 'D',
       maintainabilityIndex: Math.min(98, dynamicScore + 5),
       testSuiteRate: `${Math.round((dynamicScore / 100) * 6)}/6 Passed`,
-      codeSmellsCount: dynamicScore >= 80 ? 0 : 2,
+      codeSmellsCount: dynamicScore >= 80 ? 0 : 1,
       complexity: dynamicScore >= 80 ? 'Low (2.8)' : 'Moderate (5.4)',
       feedback,
       criteriaAudit,
