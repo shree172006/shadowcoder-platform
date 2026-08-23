@@ -22,6 +22,7 @@ const LessonWorkspaceView = lazy(() => import('./features/Learn/views/LessonWork
 const ProblemWorkspace = lazy(() => import('./features/ProblemStatements/ProblemWorkspace.jsx'));
 const AdminPanel = lazy(() => import('./features/Admin/AdminPanel.jsx'));
 const AchievementsPage = lazy(() => import('./features/Achievements/AchievementsPage.jsx'));
+const PublicProfilePage = lazy(() => import('./features/Profile/PublicProfilePage.jsx'));
 
 const RouteFallback = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400 space-y-3">
@@ -56,6 +57,7 @@ export default function App() {
               <Route path="/problems" element={<ProblemStatements />} />
               <Route path="/learn" element={<Learn />} />
               <Route path="/learn/:courseId" element={<CourseRoadmapView />} />
+              <Route path="/u/:username" element={<PublicProfilePage />} />
 
               {/* Protected Execution Workspaces (Requires Login -> Seamless Redirect) */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

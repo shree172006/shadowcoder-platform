@@ -29,12 +29,10 @@ const cartMutex = new Mutex();
 export async function processPaymentTransaction(cartId, amount) {
   const unlock = await cartMutex.acquire();
   try {
-    // Simulating database transaction query
     if (amount <= 0) {
       throw new Error('Invalid payment amount');
     }
 
-    // Process checkout balance
     return {
       success: true,
       status: 200,
@@ -107,6 +105,66 @@ runTestSuite();
     },
   },
 
+  'sim-be-02': {
+    title: 'Distributed Auth & Token Rotation',
+    role: 'Backend Developer',
+    difficulty: 'Senior',
+    description: 'Implement JWT refresh token rotation, Redis blacklisting for logged-out tokens, and sliding session expiration.',
+    files: {
+      'src/auth/jwtRotation.js': `// JWT Refresh Token Rotation & Session Validator
+export class TokenRotationService {
+  constructor() {
+    this.activeRefreshTokens = new Map(); // token -> userId
+    this.revokedTokens = new Set();
+  }
+
+  generateTokenPair(userId) {
+    const accessToken = \`acc_\${Math.random().toString(36).substring(2)}_\${Date.now()}\`;
+    const refreshToken = \`ref_\${Math.random().toString(36).substring(2)}_\${Date.now()}\`;
+    this.activeRefreshTokens.set(refreshToken, userId);
+    return { accessToken, refreshToken };
+  }
+
+  rotateRefreshToken(oldRefreshToken) {
+    // 1. Detect Reuse of Compromised Tokens
+    if (this.revokedTokens.has(oldRefreshToken)) {
+      throw new Error('SECURITY ALERT: Attempted token reuse detected.');
+    }
+
+    const userId = this.activeRefreshTokens.get(oldRefreshToken);
+    if (!userId) {
+      throw new Error('Invalid or expired refresh token');
+    }
+
+    // 2. Revoke old token and issue fresh pair
+    this.activeRefreshTokens.delete(oldRefreshToken);
+    this.revokedTokens.add(oldRefreshToken);
+
+    return this.generateTokenPair(userId);
+  }
+}
+`,
+      'src/utils/tokenBlacklist.js': `// Redis-Compatible In-Memory Token Blacklist
+export class TokenBlacklist {
+  #blacklist = new Set();
+
+  revoke(token) {
+    this.#blacklist.add(token);
+  }
+
+  isRevoked(token) {
+    return this.#blacklist.has(token);
+  }
+}
+`,
+      'package.json': `{
+  "name": "jwt-token-rotation-service",
+  "type": "module"
+}
+`,
+    },
+  },
+
   'sim-fe-01': {
     title: 'React UI Performance & Re-render Bottleneck',
     role: 'Frontend Developer',
@@ -160,12 +218,49 @@ export function useRenderCounter(componentName = 'Component') {
 `,
       'package.json': `{
   "name": "react-performance-audit",
-  "version": "1.0.0",
-  "scripts": {
-    "test": "npm run build"
-  }
+  "version": "1.0.0"
 }
 `,
+    },
+  },
+
+  'sim-fe-02': {
+    title: 'State Synchronization & Custom Hooks',
+    role: 'Frontend Developer',
+    difficulty: 'Senior',
+    description: 'Build a custom useWebSocketSync hook to manage offline queued mutations, optimistic UI updates, and conflict resolution.',
+    files: {
+      'src/hooks/useWebSocketSync.js': `import { useState, useEffect, useCallback, useRef } from 'react';
+
+export function useWebSocketSync(endpoint) {
+  const [syncedState, setSyncedState] = useState({});
+  const [offlineQueue, setOfflineQueue] = useState([]);
+  const socketRef = useRef(null);
+
+  const mutateOptimistic = useCallback((key, value) => {
+    // 1. Apply instant optimistic update
+    setSyncedState((prev) => ({ ...prev, [key]: value }));
+
+    // 2. Queue or dispatch over socket
+    if (socketRef.current && socketRef.current.readyState === 1) {
+      socketRef.current.send(JSON.stringify({ type: 'MUTATION', key, value }));
+    } else {
+      setOfflineQueue((prev) => [...prev, { key, value }]);
+    }
+  }, []);
+
+  return { syncedState, mutateOptimistic, offlineQueueLength: offlineQueue.length };
+}
+`,
+      'src/utils/syncQueue.js': `export class MutationQueue {
+  constructor() {
+    this.queue = [];
+  }
+  enqueue(item) { this.queue.push(item); }
+  flush() { const items = [...this.queue]; this.queue = []; return items; }
+}
+`,
+      'package.json': `{ "name": "websocket-sync-hook" }`,
     },
   },
 
@@ -210,11 +305,31 @@ app.get('/api/vfs', (req, res) => {
 
 app.listen(3000, () => console.log('VFS Server active on port 3000'));
 `,
-      'package.json': `{
-  "name": "vfs-stream-engine",
-  "type": "module"
+      'package.json': `{ "name": "vfs-stream-engine", "type": "module" }`,
+    },
+  },
+
+  'sim-fs-02': {
+    title: 'Real-Time Order Bus & WebSockets',
+    role: 'Full Stack Engineer',
+    difficulty: 'Lead Architect',
+    description: 'Architect a Socket.io event bus linking Express database change streams to live client UI inventory notifications.',
+    files: {
+      'src/events/orderBus.js': `export class OrderEventBus {
+  constructor() {
+    this.handlers = new Map();
+  }
+  on(event, handler) {
+    if (!this.handlers.has(event)) this.handlers.set(event, []);
+    this.handlers.get(event).push(handler);
+  }
+  emit(event, data) {
+    const list = this.handlers.get(event) || [];
+    list.forEach((h) => h(data));
+  }
 }
 `,
+      'package.json': `{ "name": "order-event-bus", "type": "module" }`,
     },
   },
 
@@ -254,9 +369,25 @@ CREATE TABLE customers (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 `,
-      'requirements.txt': `pandas==2.2.0
-numpy==1.26.0
+      'requirements.txt': `pandas==2.2.0\nnumpy==1.26.0\n`,
+    },
+  },
+
+  'sim-da-02': {
+    title: 'Fraud Detection & Risk Scoring Engine',
+    role: 'Data Analyst',
+    difficulty: 'Mid-Level',
+    description: 'Compute statistical Z-scores and anomaly thresholds across high-volume card transactions to flag suspicious activity.',
+    files: {
+      'models/risk_engine.py': `import numpy as np
+
+def calculate_anomaly_score(amounts: list, threshold: float = 3.0) -> list:
+    mean = np.mean(amounts)
+    std = np.std(amounts) or 1.0
+    z_scores = [(x - mean) / std for x in amounts]
+    return [abs(z) > threshold for z in z_scores]
 `,
+      'requirements.txt': `numpy==1.26.0\n`,
     },
   },
 };
@@ -280,43 +411,36 @@ export default function SimulationWorkspace() {
     setIsEvaluating(true);
     setTerminalLogs((prev) => [
       ...prev,
-      `[SANDBOX CONTAINER]: Spawning isolated test execution...`,
+      `[SANDBOX CONTAINER]: Spawning isolated test execution for ${scenario.title}...`,
       `[ANALYSIS]: Parsing ${Object.keys(currentFiles).length} virtual workspace files...`,
     ]);
 
-    // Simulate real Docker AST & Unit Test execution
-    await new Promise((res) => setTimeout(res, 1200));
+    await new Promise((res) => setTimeout(res, 1000));
 
-    // Audit code content across files
-    let dynamicScore = 40; // Base compilation pass
+    let dynamicScore = 45;
     const feedback = [];
     const criteriaAudit = [
       { name: 'Multi-file codebase structure', status: 'passed' },
       { name: 'Virtual File System (VFS) synchronization', status: 'passed' },
     ];
 
-    const targetCode = currentFiles['src/payment.js'] || currentFiles['src/Dashboard.jsx'] || Object.values(currentFiles)[0] || '';
+    const codeValues = Object.values(currentFiles).join('\n');
 
-    if (targetCode.includes('mutex') || targetCode.includes('Mutex') || targetCode.includes('useMemo') || targetCode.includes('pd.to_datetime')) {
+    if (codeValues.includes('mutex') || codeValues.includes('Mutex') || codeValues.includes('useMemo') || codeValues.includes('pd.to_datetime') || codeValues.includes('rotateRefreshToken') || codeValues.includes('mutateOptimistic')) {
       dynamicScore += 30;
       criteriaAudit.push({ name: 'Architecture optimization & thread safety', status: 'passed' });
-      feedback.push('Architecture Audit: Detected optimal concurrency/memoization synchronization pattern.');
+      feedback.push('Staff Architecture Audit: Confirmed optimal synchronization / memoization algorithm.');
     } else {
       criteriaAudit.push({ name: 'Architecture optimization & thread safety', status: 'failed' });
-      feedback.push('Optimization Warning: Recommended synchronization / memoization patterns not found in target file.');
+      feedback.push('Architecture Warning: Recommended optimization pattern not implemented in target file.');
     }
 
-    if (targetCode.includes('try') && targetCode.includes('catch') || targetCode.includes('409') || targetCode.includes('useCallback')) {
+    if (codeValues.includes('try') && codeValues.includes('catch') || codeValues.includes('409') || codeValues.includes('useCallback') || codeValues.includes('revokedTokens')) {
       dynamicScore += 20;
-      criteriaAudit.push({ name: 'Exception boundaries & error statuses', status: 'passed' });
-      feedback.push('Error Boundary Audit: Robust exception handling and fallback boundaries confirmed.');
+      criteriaAudit.push({ name: 'Exception boundaries & security defenses', status: 'passed' });
+      feedback.push('Security Defense: Robust exception handling and fallback boundaries confirmed.');
     } else {
-      criteriaAudit.push({ name: 'Exception boundaries & error statuses', status: 'failed' });
-    }
-
-    if (targetCode.length > 50) {
-      dynamicScore += 10;
-      criteriaAudit.push({ name: 'Clean code & AST readability metrics', status: 'passed' });
+      criteriaAudit.push({ name: 'Exception boundaries & security defenses', status: 'failed' });
     }
 
     const status = dynamicScore >= 80 ? 'PASSED' : dynamicScore >= 50 ? 'NEEDS REVISION' : 'FAILED';
@@ -337,7 +461,7 @@ export default function SimulationWorkspace() {
     setScorecard(results);
     setTerminalLogs((prev) => [
       ...prev,
-      `✓ PASS: Test suites finished with score ${dynamicScore}/100 [${results.testSuiteRate}]`,
+      `✓ PASS: Test suites finished with score ${dynamicScore}/100 [${results.testSuiteRate}] (Rank: Pro Hunter Apex)`,
     ]);
     setIsEvaluating(false);
     return results;

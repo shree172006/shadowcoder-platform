@@ -1,53 +1,55 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Search, ChevronRight, Star, Shield, Zap, Target, ArrowLeft, Filter, User as UserIcon } from 'lucide-react';
+import { 
+  Trophy, Search, ChevronRight, Star, Shield, Zap, Target, 
+  ArrowLeft, Filter, User as UserIcon, Award, Crown, ExternalLink, Sparkles 
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
+import HunterCertificateModal from '../../components/IDE/HunterCertificateModal.jsx';
 
 const GLOBAL_ENGINEERS = [
-  { id: 'eng-1', name: 'Sarah Jenkins', role: 'Full Stack', pts: 14500, lvl: 42, initial: 'S', badges: ['Speed Demon', 'Bug Squasher'] },
-  { id: 'eng-2', name: 'David Chen', role: 'Backend', pts: 13200, lvl: 38, initial: 'D', badges: ['Algorithm Pro'] },
-  { id: 'eng-3', name: 'Elena Rodriguez', role: 'Frontend', pts: 12850, lvl: 35, initial: 'E', badges: ['UI Virtuoso'] },
-  { id: 'eng-4', name: 'Marcus Johnson', role: 'Frontend', pts: 11400, lvl: 31, initial: 'M', badges: ['React Master'] },
-  { id: 'eng-5', name: 'Priya Patel', role: 'Backend', pts: 10950, lvl: 29, initial: 'P', badges: ['Node Ninja'] },
-  { id: 'eng-6', name: 'Alexei Volkov', role: 'Data Analyst', pts: 10100, lvl: 27, initial: 'A', badges: ['Data Wrangler'] },
-  { id: 'eng-7', name: 'Maria Garcia', role: 'Frontend', pts: 9800, lvl: 25, initial: 'M', badges: ['CSS Wizard'] },
-  { id: 'eng-8', name: 'James Smith', role: 'Backend', pts: 9200, lvl: 22, initial: 'J', badges: ['DB Architect'] },
-  { id: 'eng-9', name: 'Linda Kim', role: 'Full Stack', pts: 8900, lvl: 21, initial: 'L', badges: ['Clean Code'] },
-  { id: 'eng-10', name: 'Robert Fox', role: 'DevOps', pts: 8400, lvl: 19, initial: 'R', badges: ['Pipeline Master'] },
-  { id: 'eng-11', name: 'Emily Chen', role: 'Frontend', pts: 8100, lvl: 18, initial: 'E', badges: ['Accessibility Pro'] },
+  { id: 'eng-1', name: 'Sarah Jenkins', role: 'Full Stack Engineer', pts: 14500, lvl: 42, initial: 'S', tier: 'Pro Hunter (Apex)', badges: ['Speed Demon', 'Bug Squasher'] },
+  { id: 'eng-2', name: 'David Chen', role: 'Backend Developer', pts: 13200, lvl: 38, initial: 'D', tier: 'Pro Hunter (Apex)', badges: ['Algorithm Pro'] },
+  { id: 'eng-3', name: 'Elena Rodriguez', role: 'Frontend Developer', pts: 12850, lvl: 35, initial: 'E', tier: 'Pro Hunter (Apex)', badges: ['UI Virtuoso'] },
+  { id: 'eng-4', name: 'Marcus Johnson', role: 'Frontend Developer', pts: 11400, lvl: 31, initial: 'M', tier: 'Pro Hunter (Apex)', badges: ['React Master'] },
+  { id: 'eng-5', name: 'Priya Patel', role: 'Backend Developer', pts: 4950, lvl: 14, initial: 'P', tier: 'Hunter (Standard)', badges: ['Node Ninja'] },
+  { id: 'eng-6', name: 'Alexei Volkov', role: 'Data Analyst', pts: 4100, lvl: 12, initial: 'A', tier: 'Hunter (Standard)', badges: ['Data Wrangler'] },
+  { id: 'eng-7', name: 'Maria Garcia', role: 'Frontend Developer', pts: 3800, lvl: 11, initial: 'M', tier: 'Hunter (Standard)', badges: ['CSS Wizard'] },
+  { id: 'eng-8', name: 'James Smith', role: 'Backend Developer', pts: 920, lvl: 3, initial: 'J', tier: 'Porter (Apprentice)', badges: ['DB Architect'] },
+  { id: 'eng-9', name: 'Linda Kim', role: 'Full Stack Engineer', pts: 890, lvl: 2, initial: 'L', tier: 'Porter (Apprentice)', badges: ['Clean Code'] },
 ];
-
-const getRankTier = (pts) => {
-  if (pts >= 20000) return { label: 'S-Rank Apex', border: 'border-amber-500/50', text: 'text-amber-500 font-black', bg: 'bg-amber-500/20' };
-  if (pts >= 14000) return { label: 'S-Tier', border: 'border-amber-500/50', text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-500/10' };
-  if (pts >= 12000) return { label: 'A-Tier', border: 'border-fuchsia-500/50', text: 'text-fuchsia-600 dark:text-fuchsia-400', bg: 'bg-fuchsia-100 dark:bg-fuchsia-500/10' };
-  if (pts >= 10000) return { label: 'B-Tier', border: 'border-blue-500/50', text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-500/10' };
-  if (pts >= 8000) return { label: 'C-Tier', border: 'border-emerald-500/50', text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-500/10' };
-  return { label: 'D-Tier', border: 'border-slate-500/50', text: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-500/10' };
-};
 
 export default function GlobalLeaderboard() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTier, setActiveTier] = useState('All Tiers');
+  const [isCertOpen, setIsCertOpen] = useState(false);
 
   // Real User Data Integration
   const leaderboardList = useMemo(() => {
-    const userXp = user?.xp || 450;
-    const userLevel = user?.level || Math.max(1, Math.floor(userXp / 100));
+    const userXp = user?.xp || 0;
+    const userLevel = user?.level || 1;
     const userName = user?.name || 'Developer';
     const userRole = user?.track ? (user.track.charAt(0).toUpperCase() + user.track.slice(1)) : 'Full Stack';
     const userInitial = userName.charAt(0).toUpperCase();
 
+    const userTier = userLevel >= 8 || userXp >= 1500
+      ? 'Pro Hunter (Apex)'
+      : userLevel >= 4 || userXp >= 500
+      ? 'Hunter (Standard)'
+      : 'Porter (Apprentice)';
+
     const realUserEntry = {
       id: 'current-user',
       name: `${userName} (You)`,
+      username: userName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
       role: userRole,
       pts: userXp,
       lvl: userLevel,
       initial: userInitial,
       isCurrentUser: true,
-      badges: ['Active Engineer', 'Verified Account']
+      tier: userTier,
+      badges: ['Active Hunter', 'Verified Account']
     };
 
     const combined = [...GLOBAL_ENGINEERS, realUserEntry];
@@ -70,140 +72,168 @@ export default function GlobalLeaderboard() {
                             u.role.toLowerCase().includes(searchQuery.toLowerCase());
       
       if (activeTier === 'All Tiers') return matchesSearch;
-      
-      const userTier = getRankTier(u.pts).label;
-      return matchesSearch && userTier === activeTier;
+      return matchesSearch && u.tier === activeTier;
     });
   }, [leaderboardList, searchQuery, activeTier]);
 
   return (
-    <div className="py-8 max-w-7xl mx-auto px-4 md:px-8 animate-in fade-in transition-colors duration-300 select-none">
+    <div className="py-8 max-w-7xl mx-auto px-4 md:px-8 animate-in fade-in transition-colors duration-300 select-none font-sans">
       
-      <Link to="/dashboard" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-bold mb-6 transition-colors text-xs">
+      <Link to="/dashboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-bold mb-6 transition-colors text-xs">
         <ArrowLeft size={16} /> Back to Dashboard
       </Link>
 
       {/* HEADER & SIGNED IN USER BANNER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-            <Trophy className="text-amber-500" size={32} /> Global Leaderboard
+          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight flex items-center gap-3">
+            <Trophy className="text-amber-400" size={32} /> Global Hunter Leaderboard
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm font-medium">
-            Live engineer rankings based on verified XP earned from job simulations & test audits.
+          <p className="text-slate-400 mt-2 text-sm font-medium">
+            Live engineer rankings based on verified XP earned from DevStudio job simulations & test audits.
           </p>
         </div>
 
         {/* Current User Standings Card */}
         {currentUserRank && (
-          <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-600/10 border-2 border-indigo-500/40 flex items-center gap-4 shrink-0 shadow-md">
-            <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-md">
-              #{currentUserRank.rank}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-black text-sm text-slate-900 dark:text-white">{user?.name || 'Engineer'}</span>
-                <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white font-bold text-[10px] uppercase">You</span>
+          <div className="p-4 rounded-3xl bg-[#0b0f19] border-2 border-indigo-500/30 flex items-center justify-between gap-6 shrink-0 shadow-xl">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-md font-mono">
+                #{currentUserRank.rank}
               </div>
-              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
-                Level {currentUserRank.lvl} • {currentUserRank.pts.toLocaleString()} XP
-              </p>
+              <div>
+                <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-wider block">Your Global Standing</span>
+                <h3 className="font-black text-white text-base">{currentUserRank.name}</h3>
+                <span className="text-xs font-mono text-amber-400 font-bold">+{currentUserRank.pts} XP • {currentUserRank.tier}</span>
+              </div>
             </div>
+
+            <button
+              onClick={() => setIsCertOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-400 hover:bg-amber-500/25 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Award size={14} /> Claim Certificate
+            </button>
           </div>
         )}
       </div>
 
-      {/* SEARCH AND FILTERS */}
-      <div className="bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 rounded-2xl p-3 mb-8 shadow-sm flex flex-col md:flex-row gap-3">
-        <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="text-slate-400" size={18} />
-          </div>
+      {/* SEARCH & TIER FILTER CONTROLS */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+          {['All Tiers', 'Pro Hunter (Apex)', 'Hunter (Standard)', 'Porter (Apprentice)'].map((tier) => (
+            <button
+              key={tier}
+              onClick={() => setActiveTier(tier)}
+              className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                activeTier === tier
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              {tier}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full md:w-80">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
-            placeholder="Search engineers by name or track..."
+            placeholder="Search engineers by name or role..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-indigo-500 text-xs font-medium text-slate-900 dark:text-white transition-colors"
+            className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-2xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
         </div>
-        
-        <select 
-          value={activeTier}
-          onChange={(e) => setActiveTier(e.target.value)}
-          className="px-4 py-2.5 bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 cursor-pointer shrink-0"
-        >
-          <option value="All Tiers">All Tiers</option>
-          <option value="S-Tier">S-Tier</option>
-          <option value="A-Tier">A-Tier</option>
-          <option value="B-Tier">B-Tier</option>
-          <option value="C-Tier">C-Tier</option>
-          <option value="D-Tier">D-Tier</option>
-        </select>
       </div>
 
-      {/* FULL LEADERBOARD TABLE */}
-      <div className="bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
-        
-        <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 dark:bg-[#0d1117]/50">
-          <div className="col-span-2 md:col-span-1">Rank</div>
-          <div className="col-span-7 md:col-span-5">Engineer</div>
-          <div className="hidden md:block col-span-3">Tier Rating</div>
-          <div className="col-span-3 text-right">XP Points</div>
-        </div>
+      {/* LEADERBOARD TABLE */}
+      <div className="bg-[#0b0f19] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs font-sans">
+            <thead className="bg-[#07090e] border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-mono">
+              <tr>
+                <th className="py-4 px-6">Rank</th>
+                <th className="py-4 px-6">Hunter Engineer</th>
+                <th className="py-4 px-6">Specialization</th>
+                <th className="py-4 px-6">Hunter Tier</th>
+                <th className="py-4 px-6 text-right">Cumulative XP</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {filteredData.map((eng) => {
+                const isTop3 = eng.rank <= 3;
+                const isCurrentUser = eng.isCurrentUser;
 
-        <div className="flex flex-col">
-          {filteredData.length > 0 ? (
-            filteredData.map((u) => {
-              const tier = getRankTier(u.pts);
-              const isYou = u.isCurrentUser;
+                return (
+                  <tr
+                    key={eng.id}
+                    className={`transition-colors ${
+                      isCurrentUser
+                        ? 'bg-indigo-950/40 border-l-4 border-l-indigo-500'
+                        : 'hover:bg-slate-900/50'
+                    }`}
+                  >
+                    <td className="py-4 px-6 font-mono font-black text-sm">
+                      {eng.rank === 1 ? '🥇 #1' : eng.rank === 2 ? '🥈 #2' : eng.rank === 3 ? '🥉 #3' : `#${eng.rank}`}
+                    </td>
 
-              return (
-                <div 
-                  key={u.id} 
-                  className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 dark:border-slate-800/50 last:border-0 transition-all items-center ${
-                    isYou 
-                      ? 'bg-indigo-50/80 dark:bg-indigo-600/15 border-l-4 border-l-indigo-600 font-bold' 
-                      : 'hover:bg-slate-50 dark:hover:bg-[#1a2133]/30'
-                  }`}
-                >
-                  <div className="col-span-2 md:col-span-1 font-black text-slate-500 dark:text-slate-400 flex items-center gap-2 text-xs sm:text-sm">
-                    #{u.rank}
-                    {u.rank <= 3 && <Trophy size={14} className={u.rank === 1 ? 'text-amber-500' : u.rank === 2 ? 'text-slate-400' : 'text-orange-500'} />}
-                  </div>
-
-                  <div className="col-span-7 md:col-span-5 flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs ${tier.bg} ${tier.text} border ${tier.border} shrink-0`}>
-                      {u.initial}
-                    </div>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white leading-tight">{u.name}</span>
-                        {isYou && <span className="px-2 py-0.2 rounded-full bg-indigo-600 text-white font-black text-[9px] uppercase">You</span>}
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-white font-mono">
+                          {eng.initial}
+                        </div>
+                        <div>
+                          <Link
+                            to={`/u/${eng.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                            className="font-bold text-white hover:text-indigo-400 transition-colors flex items-center gap-1"
+                          >
+                            {eng.name}
+                            {isTop3 && <Crown size={12} className="text-amber-400" />}
+                          </Link>
+                          <span className="text-[10px] text-slate-500 font-mono block">Level {eng.lvl}</span>
+                        </div>
                       </div>
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">{u.role} Developer</span>
-                    </div>
-                  </div>
+                    </td>
 
-                  <div className="hidden md:flex col-span-3 items-center">
-                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg ${tier.bg} ${tier.text}`}>
-                      {tier.label}
-                    </span>
-                  </div>
+                    <td className="py-4 px-6 text-slate-300 font-medium">{eng.role}</td>
 
-                  <div className="col-span-3 flex items-center justify-end gap-1.5 font-black text-sm sm:text-base text-slate-900 dark:text-white font-mono">
-                    {u.pts.toLocaleString()} <span className="hidden sm:inline text-xs font-bold text-amber-500">XP</span>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="py-12 text-center text-slate-500 text-xs font-bold">
-              No engineers found matching filter criteria.
-            </div>
-          )}
+                    <td className="py-4 px-6">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                        eng.tier.includes('Apex')
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                          : eng.tier.includes('Standard')
+                          ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'
+                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                      }`}>
+                        {eng.tier}
+                      </span>
+                    </td>
+
+                    <td className="py-4 px-6 text-right font-mono font-black text-sm text-indigo-400">
+                      +{eng.pts.toLocaleString()} XP
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {/* HUNTER CERTIFICATE MODAL */}
+      {isCertOpen && (
+        <HunterCertificateModal
+          isOpen={isCertOpen}
+          onClose={() => setIsCertOpen(false)}
+          userName={user?.name || 'Developer'}
+          tier={currentUserRank?.tier || 'Pro Hunter (Apex)'}
+          userLevel={currentUserRank?.lvl || 1}
+          userXp={currentUserRank?.pts || 0}
+          track={user?.track || 'Full Stack Systems Architecture'}
+        />
+      )}
 
     </div>
   );
