@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Folder, Search, Cpu, Settings, Play, CheckCircle2, 
-  TerminalSquare, Send, Sparkles, ChevronLeft, ChevronRight, Layers, ShieldCheck, Brain 
+  TerminalSquare, Send, Sparkles, ChevronLeft, ChevronRight, 
+  Layers, ShieldCheck, Brain, ClipboardList, Maximize2, Minimize2 
 } from 'lucide-react';
 import FileTreeExplorer from './FileTreeExplorer.jsx';
 import MonacoEditorPane from './MonacoEditorPane.jsx';
 import IntegratedTerminal from './IntegratedTerminal.jsx';
 import VSCodeStatusBar from './VSCodeStatusBar.jsx';
 import AiReviewModal from './AiReviewModal.jsx';
+import TaskInstructionsPanel from './TaskInstructionsPanel.jsx';
 
 export default function DevStudioWorkspace({
   title = 'Project Workspace',
@@ -35,11 +37,12 @@ export default function DevStudioWorkspace({
   const [dirtyFiles, setDirtyFiles] = useState(new Set());
   const [cursorPos, setCursorPos] = useState({ line: 1, column: 1 });
 
-  // Activity Bar and Panels State
-  const [activeActivity, setActiveActivity] = useState('explorer'); // 'explorer' | 'search' | 'tests' | 'settings'
+  // Activity Bar and Sidebar State: 'instructions' (Task Specs) | 'explorer' (Files)
+  const [activeSidebarTab, setActiveSidebarTab] = useState('instructions');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
-  const [sidebarWidth, setSidebarWidth] = useState(250);
+  const [sidebarWidth, setSidebarWidth] = useState(340);
+  const [isExpandedSidebar, setIsExpandedSidebar] = useState(false);
   const [terminalHeight, setTerminalHeight] = useState(220);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
@@ -114,6 +117,17 @@ export default function DevStudioWorkspace({
     setOpenTabs((prev) => prev.map((p) => (p === oldPath ? newPath : p)));
     if (activeFile === oldPath) setActiveFile(newPath);
   }, [activeFile]);
+
+  // Toggle Sidebar width (standard 340px vs wide 460px)
+  const toggleExpandSidebar = () => {
+    if (isExpandedSidebar) {
+      setSidebarWidth(340);
+      setIsExpandedSidebar(false);
+    } else {
+      setSidebarWidth(460);
+      setIsExpandedSidebar(true);
+    }
+  };
 
   // Global Keyboard Shortcuts
   useEffect(() => {
@@ -202,24 +216,24 @@ export default function DevStudioWorkspace({
         <div className="w-12 bg-[#090d14] border-r border-slate-800/80 flex flex-col items-center justify-between py-3 shrink-0 select-none">
           <div className="flex flex-col items-center gap-3">
             {[
-              { id: 'explorer', icon: <Folder size={18} />, label: 'Explorer (Ctrl+B)' },
-              { id: 'tests', icon: <Cpu size={18} />, label: 'Test Specs' },
+              { id: 'instructions', icon: <ClipboardList size={18} />, label: 'Task Specs & Jira Ticket' },
+              { id: 'explorer', icon: <Folder size={18} />, label: 'File Explorer' },
             ].map((act) => (
               <button
                 key={act.id}
                 onClick={() => {
-                  if (activeActivity === act.id && isSidebarOpen) {
+                  if (activeSidebarTab === act.id && isSidebarOpen) {
                     setIsSidebarOpen(false);
                   } else {
-                    setActiveActivity(act.id);
+                    setActiveSidebarTab(act.id);
                     setIsSidebarOpen(true);
                   }
                 }}
                 title={act.label}
-                className={`p-2 rounded-xl transition-all ${
-                  activeActivity === act.id && isSidebarOpen
+                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                  activeSidebarTab === act.id && isSidebarOpen
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                    : 'text-slate-500 hover:text-slate-200 hover:bg-slate-800/50'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 {act.icon}
@@ -230,40 +244,76 @@ export default function DevStudioWorkspace({
           <button
             onClick={() => setIsSidebarOpen((prev) => !prev)}
             title="Toggle Sidebar (Ctrl+B)"
-            className="p-2 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors"
+            className="p-2 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors cursor-pointer"
           >
             {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
         </div>
 
-        {/* 2. COLLAPSIBLE SIDEBAR PANEL */}
+        {/* 2. COLLAPSIBLE & EXPANDABLE SIDEBAR PANEL */}
         {isSidebarOpen && (
           <div
             style={{ width: `${sidebarWidth}px` }}
-            className="h-full bg-[#0b0e14] border-r border-slate-800 shrink-0 overflow-hidden relative flex flex-col"
+            className="h-full bg-[#0b0e14] border-r border-slate-800 shrink-0 overflow-hidden relative flex flex-col transition-all duration-150"
           >
-            {activeActivity === 'explorer' && (
-              <FileTreeExplorer
-                files={files}
-                activeFile={activeFile}
-                onSelectFile={handleSelectFile}
-                onCreateFile={handleCreateFile}
-                onDeleteFile={handleDeleteFile}
-                onRenameFile={handleRenameFile}
-                dirtyFiles={dirtyFiles}
-              />
-            )}
+            {/* Top Quick Tab Selector */}
+            <div className="flex items-center justify-between px-3 py-2 bg-[#080b11] border-b border-slate-800 text-[11px] font-bold">
+              <div className="flex items-center gap-1 bg-slate-900/80 p-0.5 rounded-lg border border-slate-800">
+                <button
+                  onClick={() => setActiveSidebarTab('instructions')}
+                  className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    activeSidebarTab === 'instructions'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <ClipboardList size={12} /> Jira Ticket
+                </button>
 
-            {activeActivity === 'tests' && (
-              <div className="p-4 overflow-y-auto space-y-4 text-xs font-mono">
-                <h3 className="font-bold text-white uppercase tracking-wider text-[11px]">Active Ticket Specs</h3>
-                {scenarioContext?.description ? (
-                  <p className="text-slate-400 leading-relaxed">{scenarioContext.description}</p>
-                ) : (
-                  <p className="text-slate-400">Implement the target requirements and ensure all unit test suites pass.</p>
-                )}
+                <button
+                  onClick={() => setActiveSidebarTab('explorer')}
+                  className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    activeSidebarTab === 'explorer'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Folder size={12} /> Files ({Object.keys(files).length})
+                </button>
               </div>
-            )}
+
+              {/* Expand / Minimize Width Toggle */}
+              <button
+                onClick={toggleExpandSidebar}
+                title={isExpandedSidebar ? 'Compact Sidebar' : 'Expand Sidebar'}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                {isExpandedSidebar ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+              </button>
+            </div>
+
+            {/* Panel Body */}
+            <div className="flex-1 overflow-hidden">
+              {activeSidebarTab === 'instructions' ? (
+                <TaskInstructionsPanel
+                  scenarioContext={scenarioContext}
+                  title={title}
+                  subtitle={subtitle}
+                  activeFile={activeFile}
+                  onOpenFile={handleSelectFile}
+                />
+              ) : (
+                <FileTreeExplorer
+                  files={files}
+                  activeFile={activeFile}
+                  onSelectFile={handleSelectFile}
+                  onCreateFile={handleCreateFile}
+                  onDeleteFile={handleDeleteFile}
+                  onRenameFile={handleRenameFile}
+                  dirtyFiles={dirtyFiles}
+                />
+              )}
+            </div>
           </div>
         )}
 

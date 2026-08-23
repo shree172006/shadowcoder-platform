@@ -14,7 +14,20 @@ const SCENARIO_STARTER_FILES = {
     title: 'Resolve Payment Desync & Mutex Lock',
     role: 'Backend Developer',
     difficulty: 'Mid-Level',
-    description: 'A race condition causes cart totals to desync under high concurrent traffic. Implement a thread-safe mutex lock with 409 Conflict error boundaries.',
+    ticketId: 'PAY-104',
+    priority: 'Critical Blocker',
+    keyFile: 'src/payment.js',
+    description: 'During flash sales, concurrent HTTP requests cause customer cart balances to desync. Implement a thread-safe mutex lock with 409 Conflict error boundaries to eliminate double-spending.',
+    acceptanceCriteria: [
+      'Acquire thread-safe mutex lock before mutating cart balance in src/payment.js.',
+      'Always release mutex lock in a finally block to avoid thread deadlocks.',
+      'Validate payment amounts > 0, returning status 409 on race collisions or invalid amounts.',
+      'Pass all 50 concurrent automated unit test transactions in tests/payment.test.js.',
+    ],
+    hints: [
+      'Check src/utils/mutex.js for the Mutex class API.',
+      'Wrap your transaction logic inside try { ... } finally { unlock(); } to ensure lock release.',
+    ],
     files: {
       'src/payment.js': `// Payment Processing Service - Resolve Race Condition
 import { Mutex } from './utils/mutex.js';
@@ -109,7 +122,19 @@ runTestSuite();
     title: 'Distributed Auth & Token Rotation',
     role: 'Backend Developer',
     difficulty: 'Senior',
-    description: 'Implement JWT refresh token rotation, Redis blacklisting for logged-out tokens, and sliding session expiration.',
+    ticketId: 'AUTH-202',
+    priority: 'High Priority',
+    keyFile: 'src/auth/jwtRotation.js',
+    description: 'Implement JWT refresh token rotation with immediate detection of stolen/reused refresh tokens and Redis token blacklisting.',
+    acceptanceCriteria: [
+      'Issue fresh accessToken and refreshToken pairs on every rotate request.',
+      'Detect compromised token reuse: if a previously revoked token is presented, throw a Security Alert.',
+      'Maintain revoked tokens in the security blacklist to invalidate all sessions.',
+    ],
+    hints: [
+      'In rotateRefreshToken(), check this.revokedTokens.has(oldRefreshToken) before processing.',
+      'Delete the old token from activeRefreshTokens and add it to revokedTokens.',
+    ],
     files: {
       'src/auth/jwtRotation.js': `// JWT Refresh Token Rotation & Session Validator
 export class TokenRotationService {
@@ -169,7 +194,19 @@ export class TokenBlacklist {
     title: 'React UI Performance & Re-render Bottleneck',
     role: 'Frontend Developer',
     difficulty: 'Junior',
-    description: 'A dashboard component re-renders 500+ times per keystroke due to unmemoized object allocations. Refactor with useMemo and useCallback.',
+    ticketId: 'PERF-301',
+    priority: 'Medium Priority',
+    keyFile: 'src/Dashboard.jsx',
+    description: 'An executive analytics dashboard re-renders 500+ times per keystroke due to unmemoized calculations. Refactor with useMemo and useCallback.',
+    acceptanceCriteria: [
+      'Memoize filteredMetrics using React useMemo with dependencies [metrics, filterQuery].',
+      'Memoize handleClear button action using useCallback to prevent child button re-renders.',
+      'Ensure the filter input updates smoothly with zero lag.',
+    ],
+    hints: [
+      'Ensure metrics and filterQuery are in the useMemo dependency array.',
+      'Use useRenderCounter hook to inspect component render cycles.',
+    ],
     files: {
       'src/Dashboard.jsx': `import React, { useState, useMemo, useCallback } from 'react';
 
@@ -228,7 +265,18 @@ export function useRenderCounter(componentName = 'Component') {
     title: 'State Synchronization & Custom Hooks',
     role: 'Frontend Developer',
     difficulty: 'Senior',
+    ticketId: 'SYNC-401',
+    priority: 'High Priority',
+    keyFile: 'src/hooks/useWebSocketSync.js',
     description: 'Build a custom useWebSocketSync hook to manage offline queued mutations, optimistic UI updates, and conflict resolution.',
+    acceptanceCriteria: [
+      'Apply instant optimistic UI updates before sending mutations over the socket.',
+      'Queue mutations in offlineQueue when the WebSocket connection is disconnected or reconnecting.',
+      'Flush offline mutation queue once connection is re-established.',
+    ],
+    hints: [
+      'Check socketRef.current.readyState === 1 before calling send.',
+    ],
     files: {
       'src/hooks/useWebSocketSync.js': `import { useState, useEffect, useCallback, useRef } from 'react';
 
@@ -268,7 +316,18 @@ export function useWebSocketSync(endpoint) {
     title: 'Virtual File System & Stream ZIP Parser',
     role: 'Full Stack Engineer',
     difficulty: 'Senior',
-    description: 'Build a stream-based ZIP extractor and virtual file system (VFS) tree builder connecting Node.js streams to a React editor.',
+    ticketId: 'VFS-501',
+    priority: 'High Priority',
+    keyFile: 'src/vfs/vfsTree.js',
+    description: 'Build a stream-based ZIP extractor and virtual file system (VFS) tree builder connecting Node.js streams to a React Monaco editor.',
+    acceptanceCriteria: [
+      'Parse flat file paths like "src/utils/math.js" into nested hierarchical VFS tree JSON.',
+      'Correctly mark folders vs files in the VFS structure.',
+      'Expose GET /api/vfs endpoint returning the hierarchical JSON tree.',
+    ],
+    hints: [
+      'Split paths by "/" and traverse the root children object recursively.',
+    ],
     files: {
       'src/vfs/vfsTree.js': `// Virtual File System (VFS) Tree Builder
 export function buildVfsHierarchy(fileMap = {}) {
@@ -313,7 +372,15 @@ app.listen(3000, () => console.log('VFS Server active on port 3000'));
     title: 'Real-Time Order Bus & WebSockets',
     role: 'Full Stack Engineer',
     difficulty: 'Lead Architect',
-    description: 'Architect a Socket.io event bus linking Express database change streams to live client UI inventory notifications.',
+    ticketId: 'STREAM-601',
+    priority: 'Critical Blocker',
+    keyFile: 'src/events/orderBus.js',
+    description: 'Architect a pub/sub event bus linking database change streams to live client UI inventory notifications.',
+    acceptanceCriteria: [
+      'Implement OrderEventBus with .on(event, handler) and .emit(event, data) pub/sub methods.',
+      'Support multiple listener subscribers per event channel without memory leaks.',
+    ],
+    hints: ['Use a Map to store listener arrays keyed by event name.'],
     files: {
       'src/events/orderBus.js': `export class OrderEventBus {
   constructor() {
@@ -337,7 +404,16 @@ app.listen(3000, () => console.log('VFS Server active on port 3000'));
     title: 'Clean Customer Data & Timezone Normalizer',
     role: 'Data Analyst',
     difficulty: 'Junior',
-    description: 'Parse raw CSV records, strip duplicates, normalize UTC timestamps, and validate phone numbers.',
+    ticketId: 'DATA-701',
+    priority: 'Medium Priority',
+    keyFile: 'data/cleaner.py',
+    description: 'Parse raw CSV records, strip duplicates by customer email, normalize UTC timestamps, and validate phone numbers.',
+    acceptanceCriteria: [
+      'Drop duplicate rows based on the "email" column.',
+      'Convert created_at timestamps into standard UTC datetime objects.',
+      'Fill missing phone number cells with placeholder "N/A".',
+    ],
+    hints: ['Use pandas df.drop_duplicates(subset=["email"]) and pd.to_datetime(..., utc=True).'],
     files: {
       'data/cleaner.py': `# Data Cleaning & Timezone Normalizer
 import pandas as pd
@@ -377,7 +453,15 @@ CREATE TABLE customers (
     title: 'Fraud Detection & Risk Scoring Engine',
     role: 'Data Analyst',
     difficulty: 'Mid-Level',
-    description: 'Compute statistical Z-scores and anomaly thresholds across high-volume card transactions to flag suspicious activity.',
+    ticketId: 'FRAUD-801',
+    priority: 'Critical Blocker',
+    keyFile: 'models/risk_engine.py',
+    description: 'Compute statistical Z-scores and anomaly thresholds across high-volume transactions to flag suspicious credit card fraud.',
+    acceptanceCriteria: [
+      'Calculate mean and standard deviation for transaction amounts.',
+      'Flag any transaction whose Z-score absolute value exceeds the threshold.',
+    ],
+    hints: ['Z-score formula: (x - mean) / std.'],
     files: {
       'models/risk_engine.py': `import numpy as np
 
