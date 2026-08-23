@@ -38,7 +38,7 @@ export default function AuthPage() {
       const { signInWithGoogle } = await import('../../lib/firebase');
       const firebaseUser = await signInWithGoogle();
       const idToken = await firebaseUser.getIdToken();
-      await loginWithFirebaseGoogle(idToken);
+      await loginWithFirebaseGoogle(idToken, firebaseUser);
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);

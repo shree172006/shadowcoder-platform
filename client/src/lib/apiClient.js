@@ -1,7 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 /**
- * Custom fetch client with credentials support and automatic 401 refresh token flow.
+ * Custom fetch client with credentials support, timeout handling, and automatic 401 refresh token flow.
  */
 export const apiClient = async (endpoint, options = {}) => {
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
@@ -11,8 +11,16 @@ export const apiClient = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  // Timeout controller (default 8s or custom timeout from options)
-  const timeoutMs = options.timeout || 8000;
+  // Auth endpoints get 15s timeout to allow cold-start servers on Render to wake up; other requests get 8s
+  const isAuthEndpoint =
+    endpoint.includes('/auth/login') ||
+    endpoint.includes('/auth/register') ||
+    endpoint.includes('/auth/refresh') ||
+    endpoint.includes('/auth/firebase') ||
+    endpoint.includes('/auth/me');
+
+  const defaultTimeout = isAuthEndpoint ? 15000 : 8000;
+  const timeoutMs = options.timeout || defaultTimeout;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -33,7 +41,7 @@ export const apiClient = async (endpoint, options = {}) => {
   } catch (fetchErr) {
     clearTimeout(timeoutId);
     if (fetchErr.name === 'AbortError') {
-      const timeoutError = new Error('Request timed out. Backend service may be waking up.');
+      const timeoutError = new Error('Connection timed out. Server is waking up, please try again.');
       timeoutError.status = 408;
       throw timeoutError;
     }
@@ -43,13 +51,6 @@ export const apiClient = async (endpoint, options = {}) => {
   }
 
   // If unauthorized (401), attempt to refresh token once (except for auth endpoints)
-  const isAuthEndpoint =
-    endpoint.includes('/auth/login') ||
-    endpoint.includes('/auth/register') ||
-    endpoint.includes('/auth/refresh') ||
-    endpoint.includes('/auth/firebase') ||
-    endpoint.includes('/auth/me');
-
   if (response.status === 401 && !isAuthEndpoint) {
     try {
       const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
