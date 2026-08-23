@@ -6,7 +6,7 @@
  * @param {Function} requestHandler - Asynchronous Express middleware/controller function
  * @returns {Function} Express middleware function
  */
-const asyncHandler = (requestHandler) => {
+export const asyncHandler = (requestHandler) => {
   return (req, res, next) => {
     Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err));
   };
