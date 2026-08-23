@@ -43,7 +43,6 @@ export default function AuthPage() {
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        // User closed or cancelled the Google authentication popup; suppress red error banner
         return;
       }
       setError(
@@ -114,25 +113,26 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#07090e] dark:bg-[#07090e] text-slate-100 flex items-center justify-center p-4 overflow-hidden select-none">
+    <div className="relative min-h-screen bg-slate-50 dark:bg-[#07090e] text-slate-900 dark:text-slate-100 flex items-center justify-center p-4 overflow-hidden select-none transition-colors duration-300">
+      
       {/* Background Animated Glowing Orbs */}
-      <div className="absolute top-1/4 left-10 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute top-1/4 left-10 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-purple-500/10 dark:bg-purple-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
       <ParticleCanvas />
 
       {/* Main Glassmorphism Auth Card */}
-      <div className="relative z-10 w-full max-w-5xl bg-slate-900/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 transition-all duration-500">
+      <div className="relative z-10 w-full max-w-5xl bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 transition-all duration-500">
         
         {/* Left Side: Hero Showcase */}
         <AuthSidebarShowcase />
 
         {/* Right Side: Clean 1-Click Google + Email Form */}
-        <div className="lg:col-span-6 p-8 lg:p-12 flex flex-col justify-center">
+        <div className="lg:col-span-6 p-8 lg:p-12 flex flex-col justify-center bg-white dark:bg-slate-900/90 transition-colors duration-300">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white tracking-tight mb-1">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mb-1">
               {isSignup ? 'Create Developer Account' : 'Welcome Back'}
             </h2>
-            <p className="text-slate-400 text-sm">
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
               {isSignup
                 ? 'Join ShadowCoder to unlock simulations, earn XP, and level up.'
                 : 'Sign in to access your dashboard, scenarios, and leaderboard rank.'}
@@ -140,24 +140,25 @@ export default function AuthPage() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm font-medium flex items-center gap-2">
+            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-sm font-medium flex items-center gap-2">
               <ShieldCheck size={18} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
+
           {/* 1-Click Firebase Google Sign-In */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isSubmitting}
-            className="w-full mb-6 flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm transition-all shadow-md hover:scale-[1.01] disabled:opacity-50"
+            className="w-full mb-6 flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl bg-slate-100 dark:bg-white hover:bg-slate-200 dark:hover:bg-slate-100 text-slate-900 font-bold text-sm transition-all shadow-sm hover:scale-[1.01] disabled:opacity-50 border border-slate-200 dark:border-transparent cursor-pointer"
           >
             <GoogleIcon /> Continue with Google
           </button>
 
           <div className="relative flex items-center justify-center mb-6">
-            <div className="w-full border-t border-slate-800" />
-            <span className="absolute bg-[#0b0e14] px-4 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+            <div className="w-full border-t border-slate-200 dark:border-slate-800" />
+            <span className="absolute bg-white dark:bg-[#0b0e14] px-4 text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 font-semibold">
               Or with Email & Password
             </span>
           </div>
@@ -166,11 +167,11 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignup && (
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                   Full Name
                 </label>
                 <div className="relative">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                   <input
                     type="text"
                     name="name"
@@ -178,18 +179,18 @@ export default function AuthPage() {
                     onChange={handleChange}
                     placeholder="Alex Mercer"
                     required={isSignup}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                 <input
                   type="email"
                   name="email"
@@ -197,17 +198,17 @@ export default function AuthPage() {
                   onChange={handleChange}
                   placeholder="alex@shadowcoder.com"
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                 <input
                   type="password"
                   name="password"
@@ -215,27 +216,26 @@ export default function AuthPage() {
                   onChange={handleChange}
                   placeholder="••••••••••••"
                   required
-                  minLength={8}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 />
               </div>
             </div>
 
             {isSignup && (
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                  Career Specialization Track
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                  Specialization Track
                 </label>
                 <select
                   name="track"
                   value={formData.track}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                 >
-                  <option value="fullstack">Full Stack Engineer</option>
-                  <option value="frontend">Frontend Specialist (React/Vite)</option>
-                  <option value="backend">Backend Specialist (Node/Express/MongoDB)</option>
-                  <option value="data-analytics">Data Analyst (SQL/Python/Pandas)</option>
+                  <option value="frontend">Frontend Developer Track</option>
+                  <option value="backend">Backend Developer Track</option>
+                  <option value="fullstack">Full Stack Engineer Track</option>
+                  <option value="data-analytics">Data Analyst Track</option>
                 </select>
               </div>
             )}
@@ -243,31 +243,38 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              className="w-full mt-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  {isSignup ? 'Create Account' : 'Sign In to ShadowCoder'}
+                  {isSignup ? 'Complete Registration' : 'Sign In to Workspace'}
                   <ArrowRight size={18} />
                 </>
               )}
             </button>
           </form>
 
-          {/* Toggle between Signup and Login */}
-          <div className="mt-8 text-center text-sm text-slate-400">
-            {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
+          {/* Toggle Login vs Signup */}
+          <div className="mt-8 text-center">
             <button
               type="button"
               onClick={() => {
                 setIsSignup(!isSignup);
                 setError('');
               }}
-              className="text-indigo-400 font-bold hover:underline transition-colors ml-1"
+              className="text-xs text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors cursor-pointer"
             >
-              {isSignup ? 'Sign In' : 'Create Account'}
+              {isSignup ? (
+                <>
+                  Already have an account? <span className="text-indigo-600 dark:text-indigo-400 font-bold underline">Sign In</span>
+                </>
+              ) : (
+                <>
+                  Don't have an account? <span className="text-indigo-600 dark:text-indigo-400 font-bold underline">Create One Free</span>
+                </>
+              )}
             </button>
           </div>
         </div>
