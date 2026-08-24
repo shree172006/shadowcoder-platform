@@ -1,23 +1,39 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Sparkles, Briefcase, FileCode, BookOpen, Trophy, ArrowRight, ShieldCheck, 
-  Terminal, Code2, Cpu, CheckCircle2, Zap, Layout, Server, Layers, PieChart, Star, 
-  Play, Folder, ChevronRight, ExternalLink, RotateCcw, CornerDownLeft 
+  Briefcase, BookOpen, Trophy, ArrowRight, ShieldCheck, 
+  Terminal, Code2, Cpu, CheckCircle2, Zap, Layout, Server, Layers, PieChart, 
+  Play, RotateCcw, CornerDownLeft, GitBranch, Check, ExternalLink, Sparkles 
 } from 'lucide-react';
 
 const CAREER_TRACKS = [
-  { id: 'frontend', title: 'Frontend Developer', icon: <Layout className="text-pink-500" size={28} />, desc: 'HTML5, CSS Grid, React 19, Vite, Testing & Next.js App Router.', modules: '9 Modules' },
-  { id: 'backend', title: 'Backend Developer', icon: <Server className="text-blue-500" size={28} />, desc: 'Node.js, Express, PostgreSQL, Redis Rate Limiting & Concurrency Mutexes.', modules: '8 Modules' },
-  { id: 'fullstack', title: 'Full Stack Engineer', icon: <Layers className="text-amber-500" size={28} />, desc: 'Monorepos, WebSockets, Virtual File Systems & CI/CD Pipelines.', modules: '12 Modules' },
-  { id: 'data-analytics', title: 'Data Analyst', icon: <PieChart className="text-purple-500" size={28} />, desc: 'Advanced SQL Window Functions, Python Pandas, NumPy & Data Pipelines.', modules: '7 Modules' },
+  { id: 'frontend', title: 'Frontend Architecture', icon: <Layout className="text-indigo-400" size={22} />, desc: 'React 19 internals, Virtual DOM reconciliation, state machines, and web performance profiling.', modules: '9 Modules' },
+  { id: 'backend', title: 'Distributed Backend Systems', icon: <Server className="text-cyan-400" size={22} />, desc: 'High-throughput Node.js microservices, concurrency mutexes, Redis rate limiting, and PostgreSQL locking.', modules: '8 Modules' },
+  { id: 'fullstack', title: 'Full-Stack Cloud Engineering', icon: <Layers className="text-amber-400" size={22} />, desc: 'Monorepos, real-time WebSocket event buses, virtual file systems, and Docker sandboxes.', modules: '12 Modules' },
+  { id: 'data-analytics', title: 'Data Systems & Pipelines', icon: <PieChart className="text-emerald-400" size={22} />, desc: 'Advanced SQL window functions, statistical anomaly detection, and high-volume data normalizers.', modules: '7 Modules' },
 ];
 
-const FEATURES = [
-  { icon: <Briefcase className="text-indigo-400" size={24} />, title: 'Real-World Job Simulations', desc: 'Debug production codebase tickets, submit pull requests, and pass executive code audits.' },
-  { icon: <Terminal className="text-emerald-400" size={24} />, title: 'DevStudio Web IDE', desc: 'Multi-file file explorer, Monaco editor, tabs, breadcrumbs, and integrated CLI terminal.' },
-  { icon: <BookOpen className="text-amber-400" size={24} />, title: 'Official 2D Roadmap Paths', desc: 'Follow step-by-step career flowcharts with interactive module verification tests.' },
-  { icon: <Trophy className="text-purple-400" size={24} />, title: '1-Click GitHub Exporter', desc: 'Export verified repository code with recruiter badges and LinkedIn proof of work.' },
+const PLATFORM_PILLARS = [
+  { 
+    icon: <Briefcase className="text-indigo-400" size={20} />, 
+    title: 'Production Job Simulations', 
+    desc: 'Debug real multi-file codebases, resolve high-concurrency race conditions, and pass automated staff audits.' 
+  },
+  { 
+    icon: <Terminal className="text-cyan-400" size={20} />, 
+    title: 'DevStudio Cloud IDE', 
+    desc: 'Full-featured Monaco workspace with hierarchical file explorer, multi-tab editing, and integrated Linux terminal.' 
+  },
+  { 
+    icon: <ShieldCheck className="text-emerald-400" size={20} />, 
+    title: 'AI Senior Staff Code Reviews', 
+    desc: 'Automated line-by-line AST code quality audits, Big-O complexity metrics, and security defense scoring.' 
+  },
+  { 
+    icon: <Trophy className="text-amber-400" size={20} />, 
+    title: 'Verified GitHub Proof of Work', 
+    desc: '1-click export solved repositories with cryptographic audit badges directly to your GitHub and LinkedIn.' 
+  },
 ];
 
 const INITIAL_DEMO_FILES = {
@@ -29,8 +45,9 @@ const lock = new Mutex();
 export async function processTransaction(cartId, amount) {
   const release = await lock.acquire();
   try {
-    if (amount <= 0) throw new Error('Invalid amount');
-    return { status: 200, cartId, processed: true };
+    if (amount <= 0) throw new Error('Invalid transaction amount');
+    // Simulated atomic ledger update
+    return { status: 200, cartId, processed: true, timestamp: Date.now() };
   } catch (err) {
     return { status: 409, error: err.message };
   } finally {
@@ -72,8 +89,8 @@ export default function LandingPage() {
   // Interactive CLI State
   const [cliInput, setCliInput] = useState('');
   const [terminalHistory, setTerminalHistory] = useState([
-    { type: 'system', text: 'DevStudio Interactive Sandbox Terminal v1.0.0' },
-    { type: 'system', text: 'Type "npm test", "node src/payment.js", or click "Run Sandbox (Ctrl+Enter)" to execute.' },
+    { type: 'system', text: 'ShadowCoder DevStudio Virtual Container v1.0.0 [x86_64-node]' },
+    { type: 'system', text: 'Type "npm test" or press Ctrl+Enter to execute concurrent test suites.' },
   ]);
 
   const terminalEndRef = useRef(null);
@@ -96,7 +113,7 @@ export default function LandingPage() {
     if (cmd === 'help') {
       setTerminalHistory((prev) => [
         ...prev,
-        { type: 'output', text: 'Available commands: npm test, npm run test, node src/payment.js, ls, cat <file>, clear' }
+        { type: 'output', text: 'Commands: npm test, node src/payment.js, ls, cat <file>, clear' }
       ]);
       return;
     }
@@ -104,7 +121,7 @@ export default function LandingPage() {
     if (cmd === 'ls') {
       setTerminalHistory((prev) => [
         ...prev,
-        { type: 'output', text: Object.keys(demoFiles).join('   ') }
+        { type: 'output', text: Object.keys(demoFiles).join('    ') }
       ]);
       return;
     }
@@ -130,22 +147,21 @@ export default function LandingPage() {
       setIsRunning(true);
       setTerminalHistory((prev) => [
         ...prev,
-        { type: 'info', text: '⚡ Spawning isolated sandbox test runner across 50 concurrent transactions...' }
+        { type: 'info', text: '⚡ Running concurrent test harness (50 parallel threads)...' }
       ]);
 
       setTimeout(() => {
         setIsRunning(false);
         setTerminalHistory((prev) => [
           ...prev,
-          { type: 'success', text: '✓ PASS: tests/payment.test.js (50/50 concurrent threads synchronized without collision).' },
-          { type: 'success', text: '✓ AST Code Score: 98/100 (Hunter Rank: Pro Hunter Apex)' },
-          { type: 'system', text: 'Status: Ready for production deployment.' }
+          { type: 'success', text: '✓ PASS: tests/payment.test.js — 50/50 concurrent transactions synchronized with 0 collisions.' },
+          { type: 'success', text: '✓ AST Code Quality: 98/100 | Security Audit: Grade A+ (Passed)' },
+          { type: 'system', text: 'Ready for GitHub repository export & recruiter verification.' }
         ]);
-      }, 700);
+      }, 650);
       return;
     }
 
-    // Default unknown command
     setTerminalHistory((prev) => [
       ...prev,
       { type: 'error', text: `bash: ${rawCmd}: command not found. Type "npm test" or "help".` }
@@ -163,7 +179,6 @@ export default function LandingPage() {
     setCliInput('');
   };
 
-  // Bind Global Ctrl+Enter / Cmd+Enter Shortcut
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -175,69 +190,71 @@ export default function LandingPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [demoFiles]);
 
-  // Auto-scroll terminal to bottom
   useEffect(() => {
     terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [terminalHistory]);
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-slate-100 font-sans transition-colors duration-300 overflow-hidden select-none">
+    <div className="min-h-screen bg-[#07090e] text-slate-100 font-sans selection:bg-indigo-500/30 selection:text-white select-none">
       
       {/* ═══════════════════════════════════════════════════════ */}
       {/* HERO SECTION */}
       {/* ═══════════════════════════════════════════════════════ */}
-      <section className="relative pt-16 pb-12 md:pt-24 md:pb-20 px-4 md:px-8 max-w-7xl mx-auto text-center">
+      <section className="relative pt-20 pb-16 md:pt-28 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto text-center">
         
-        {/* Glow backdrop */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Subtle engineering grid backdrop */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f29370f_1px,transparent_1px),linear-gradient(to_bottom,#1f29370f_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-extrabold text-xs mb-8 shadow-sm">
-          <Sparkles size={14} className="text-amber-400 fill-amber-400" />
-          <span>The Next-Gen Developer Career & Job Simulation Platform</span>
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-slate-300 font-mono text-xs mb-8 shadow-inner">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Solo Leveling for Software Engineers</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.1] mb-6 max-w-5xl mx-auto">
-          Level Up Your Software Career Through <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Real-World Codebases</span>
+        {/* Headline */}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.08] max-w-4xl mx-auto mb-6">
+          The Proof-of-Work Platform for <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-400">Serious Developers</span>
         </h1>
 
-        <p className="text-base sm:text-xl text-slate-400 font-medium max-w-3xl mx-auto mb-10 leading-relaxed">
-          Debug real Jira tickets in an integrated VS Code-grade DevStudio IDE, pass executive code quality audits, and export verified proof-of-work repositories to your GitHub.
+        <p className="text-base sm:text-lg text-slate-400 font-normal max-w-2xl mx-auto mb-10 leading-relaxed">
+          Solve real multi-file workplace tickets in a VS Code-grade IDE. Pass automated AST code quality audits and export verified repositories to your GitHub for recruiters.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 relative z-10">
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-16 relative z-10">
           <Link
             to="/signup"
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black text-sm uppercase tracking-wider transition-all shadow-xl shadow-indigo-600/25 flex items-center justify-center gap-2 hover:scale-105"
+            className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs tracking-wider uppercase transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
           >
-            Get Started Free <ArrowRight size={18} />
+            Start Practicing Free <ArrowRight size={15} />
           </Link>
           <Link
             to="/simulations"
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900 border border-slate-800 text-white font-bold text-sm hover:border-indigo-500 transition-all flex items-center justify-center gap-2 shadow-sm"
+            className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-200 font-medium text-xs tracking-wider transition-all flex items-center justify-center gap-2"
           >
             Explore Public Simulations
           </Link>
         </div>
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* INTERACTIVE DEVSTUDIO IDE PREVIEW SHOWCASE */}
+        {/* INTERACTIVE DEVSTUDIO IDE PREVIEW */}
         {/* ═══════════════════════════════════════════════════════ */}
-        <div className="max-w-5xl mx-auto rounded-3xl bg-[#0b0f19] border-2 border-indigo-500/30 shadow-2xl overflow-hidden text-left relative z-10 font-mono text-xs">
+        <div className="rounded-2xl bg-[#090b10] border border-slate-800 shadow-2xl overflow-hidden text-left relative z-10 font-mono text-xs">
           
-          {/* Mock IDE Topbar */}
-          <div className="flex items-center justify-between px-4 py-2.5 bg-[#080b12] border-b border-slate-800 text-slate-400 text-[11px]">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between px-4 py-2.5 bg-[#06080d] border-b border-slate-800 text-slate-400 text-[11px]">
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block" />
-              <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
-              <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
-              <span className="ml-2 font-bold text-white">DevStudio IDE • Simulation Sandbox</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+              <span className="ml-2 font-bold text-slate-300 text-xs">DevStudio Sandbox • {activeFile}</span>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setDemoFiles(INITIAL_DEMO_FILES)}
-                title="Reset code"
-                className="p-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Reset starter files"
+                className="p-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
                 <RotateCcw size={12} />
               </button>
@@ -245,37 +262,37 @@ export default function LandingPage() {
               <button
                 onClick={handleRunDemo}
                 disabled={isRunning}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md cursor-pointer transition-all hover:scale-105"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
               >
-                {isRunning ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Play size={12} className="fill-white" />}
-                Run Sandbox (Ctrl+Enter)
+                {isRunning ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Play size={11} className="fill-white" />}
+                Run Tests (Ctrl+Enter)
               </button>
             </div>
           </div>
 
           {/* IDE Canvas */}
           <div className="grid grid-cols-1 md:grid-cols-4 min-h-[380px]">
-            {/* Sidebar File Explorer */}
-            <div className="p-3 bg-[#090d14] border-r border-slate-800 space-y-1">
-              <span className="text-[10px] font-bold uppercase text-slate-500 block mb-2">Explorer</span>
+            {/* File Tree */}
+            <div className="p-3 bg-[#080a0f] border-r border-slate-850 space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2 px-1">Files</span>
               {Object.keys(demoFiles).map((file) => (
                 <div
                   key={file}
                   onClick={() => setActiveFile(file)}
                   className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${
-                    activeFile === file ? 'bg-indigo-600/30 text-white font-bold border-l-2 border-indigo-500' : 'text-slate-400 hover:bg-slate-800'
+                    activeFile === file 
+                      ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30 font-medium' 
+                      : 'text-slate-400 hover:bg-slate-900'
                   }`}
                 >
-                  <Code2 size={13} className="text-cyan-400" />
+                  <Code2 size={13} className="text-slate-400 shrink-0" />
                   <span className="truncate">{file}</span>
                 </div>
               ))}
             </div>
 
-            {/* Editable Code View & Terminal */}
-            <div className="md:col-span-3 bg-[#07090e] p-4 flex flex-col justify-between overflow-hidden">
-              
-              {/* Editable Code Textarea */}
+            {/* Code Editor Area */}
+            <div className="md:col-span-3 bg-[#06080d] p-4 flex flex-col justify-between overflow-hidden">
               <div className="flex-1 overflow-y-auto">
                 <textarea
                   value={demoFiles[activeFile]}
@@ -286,13 +303,13 @@ export default function LandingPage() {
                 />
               </div>
 
-              {/* REAL INTERACTIVE CLI TERMINAL */}
-              <div className="mt-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 text-[11px] font-mono space-y-2">
-                <div className="flex items-center justify-between border-b border-slate-850 pb-1.5 text-slate-400 text-[10px]">
-                  <span className="text-indigo-400 font-bold flex items-center gap-1">
-                    <Terminal size={12} /> Interactive CLI Shell
+              {/* Linux Terminal CLI */}
+              <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-slate-850 text-[11px] font-mono space-y-2">
+                <div className="flex items-center justify-between border-b border-slate-900 pb-1.5 text-slate-400 text-[10px]">
+                  <span className="text-slate-400 font-medium flex items-center gap-1.5">
+                    <Terminal size={12} className="text-indigo-400" /> Integrated Terminal
                   </span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => executeCommand('npm test')}
                       className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 transition-colors cursor-pointer"
@@ -308,7 +325,6 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* History Output */}
                 <div className="max-h-[110px] overflow-y-auto space-y-1 custom-scrollbar">
                   {terminalHistory.map((item, idx) => (
                     <div
@@ -317,7 +333,7 @@ export default function LandingPage() {
                         item.type === 'input'
                           ? 'text-indigo-300 font-bold'
                           : item.type === 'success'
-                          ? 'text-emerald-400 font-bold'
+                          ? 'text-emerald-400 font-medium'
                           : item.type === 'error'
                           ? 'text-rose-400'
                           : item.type === 'info'
@@ -331,7 +347,6 @@ export default function LandingPage() {
                   <div ref={terminalEndRef} />
                 </div>
 
-                {/* Command Input Form */}
                 <form onSubmit={handleTerminalSubmit} className="flex items-center gap-2 pt-1 border-t border-slate-900">
                   <span className="text-indigo-400 font-bold shrink-0">devtier:~/workspace$</span>
                   <input
@@ -340,7 +355,7 @@ export default function LandingPage() {
                     value={cliInput}
                     onChange={(e) => setCliInput(e.target.value)}
                     placeholder="npm test"
-                    className="w-full bg-transparent text-white focus:outline-none text-[11px] placeholder-slate-600"
+                    className="w-full bg-transparent text-slate-200 focus:outline-none text-[11px] placeholder-slate-600"
                   />
                   <button
                     type="submit"
@@ -350,54 +365,53 @@ export default function LandingPage() {
                   </button>
                 </form>
               </div>
-
             </div>
           </div>
         </div>
 
-        {/* METRICS BAR */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-3xl bg-[#0b0f19] border border-slate-800 shadow-sm max-w-4xl mx-auto mt-12">
+        {/* Metrics Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-5 rounded-2xl bg-slate-900/60 border border-slate-800 max-w-4xl mx-auto mt-10 text-left">
           <div className="space-y-1">
-            <h3 className="text-2xl sm:text-3xl font-black text-indigo-400">4</h3>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Career Tracks</p>
+            <span className="text-2xl font-bold text-white font-mono">4</span>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Career Tracks</p>
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl sm:text-3xl font-black text-emerald-400">100%</h3>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">DevStudio VFS IDE</p>
+            <span className="text-2xl font-bold text-emerald-400 font-mono">100%</span>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">VFS Sandboxed IDE</p>
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl sm:text-3xl font-black text-amber-400">+500</h3>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Engineers Playing</p>
+            <span className="text-2xl font-bold text-indigo-400 font-mono">AST Graded</span>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Automated PR Audits</p>
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl sm:text-3xl font-black text-purple-400">Pro Hunter</h3>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Verified Audits</p>
+            <span className="text-2xl font-bold text-amber-400 font-mono">1-Click</span>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">GitHub Repo Exporter</p>
           </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* FEATURE HIGHLIGHTS */}
+      {/* 4 CORE PILLARS */}
       {/* ═══════════════════════════════════════════════════════ */}
-      <section className="py-16 bg-[#090d14] border-y border-slate-800/80 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-20 bg-[#090b10] border-y border-slate-800 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
-            <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-              Why Engineers Choose ShadowCoder
+            <h2 className="text-3xl font-bold text-white tracking-tight">
+              Engineered for Production Competence
             </h2>
-            <p className="text-slate-400 text-sm font-medium">
-              Everything you need to level up from junior coder to senior staff engineer.
+            <p className="text-slate-400 text-sm">
+              Single-file algorithm quizzes don't prepare you for production codebases. ShadowCoder tests full architecture skills.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURES.map((feat) => (
-              <div key={feat.title} className="p-6 rounded-3xl bg-[#0b0f19] border border-slate-800 shadow-sm space-y-3">
-                <div className="p-3 w-fit rounded-2xl bg-slate-900 border border-slate-800">
-                  {feat.icon}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {PLATFORM_PILLARS.map((pillar) => (
+              <div key={pillar.title} className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3 hover:border-slate-700 transition-colors">
+                <div className="p-2.5 w-fit rounded-xl bg-slate-800 border border-slate-750">
+                  {pillar.icon}
                 </div>
-                <h3 className="text-base font-bold text-white">{feat.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed font-medium">{feat.desc}</p>
+                <h3 className="text-sm font-bold text-white">{pillar.title}</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">{pillar.desc}</p>
               </div>
             ))}
           </div>
@@ -405,37 +419,37 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* CAREER TRACKS SECTION */}
+      {/* CAREER TRACKS */}
       {/* ═══════════════════════════════════════════════════════ */}
-      <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
-          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-            Specialized Career Paths
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-14 space-y-2">
+          <h2 className="text-3xl font-bold text-white tracking-tight">
+            Specialized Engineering Tracks
           </h2>
-          <p className="text-slate-400 text-sm font-medium">
-            Industry-aligned curriculum flowcharts built for modern high-paying engineering roles.
+          <p className="text-slate-400 text-sm">
+            Curated industry roadmaps with integrated playbooks, code sandboxes, and verification quizzes.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {CAREER_TRACKS.map((track) => (
-            <div key={track.id} className="p-6 rounded-3xl bg-[#0b0f19] border border-slate-800 hover:border-indigo-500/50 transition-all group flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="p-3.5 w-fit rounded-2xl bg-slate-900 border border-slate-800">
+            <div key={track.id} className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/40 transition-all flex flex-col justify-between space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-750 shrink-0">
                   {track.icon}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">
+                  <h3 className="text-base font-bold text-white">
                     {track.title}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-2 leading-relaxed">{track.desc}</p>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">{track.desc}</p>
                 </div>
               </div>
 
-              <div className="pt-6 mt-6 border-t border-slate-800 flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-500">{track.modules}</span>
-                <Link to="/learn" className="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 transition-colors">
-                  Explore <ChevronRight size={14} />
+              <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
+                <span className="font-mono text-slate-500">{track.modules}</span>
+                <Link to="/learn" className="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors">
+                  Open Syllabus <ArrowRight size={13} />
                 </Link>
               </div>
             </div>
