@@ -5,6 +5,7 @@ import {
   logoutUser,
   refreshToken,
   getMe,
+  getLeaderboard,
   firebaseLogin,
 } from '../controllers/authController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
@@ -19,6 +20,7 @@ router.post('/login', authLimiter, loginUser);
 router.post('/logout', protect, logoutUser);
 router.post('/refresh', refreshToken);
 router.get('/me', protect, getMe);
+router.get('/leaderboard', getLeaderboard);
 
 // Firebase Unified Auth Route (with Brute-Force Rate Limiting)
 router.post('/firebase', authLimiter, firebaseLogin);
