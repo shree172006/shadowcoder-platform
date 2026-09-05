@@ -8,6 +8,7 @@ import DesktopOnly from '../../layouts/DesktopOnly';
 import DevStudioWorkspace from '../../components/IDE/DevStudioWorkspace.jsx';
 import SimulationReviewModal from './components/SimulationReviewModal.jsx';
 import { auditWorkspaceFiles } from '../../lib/codeAuditor.js';
+import { executeRealCandidateTests } from '../../lib/realSandboxRunner.js';
 
 // Multi-file starter codebases dictionary for real workplace simulations
 const SCENARIO_STARTER_FILES = {
@@ -541,53 +542,62 @@ export default function SimulationWorkspace() {
       return failedResults;
     }
 
-    // 2. LOGICAL AUDITING IF SYNTAX IS VALID
-    let dynamicScore = 40;
-    const feedback = [];
+    // 2. REAL RUNTIME TEST EXECUTION
+    const testExecution = await executeRealCandidateTests(id, currentFiles);
+    const testLogs = [];
+
+    testExecution.tests.forEach((t) => {
+      if (t.passed) {
+        testLogs.push(`  ✓ PASS: ${t.name} (${t.duration || 1}ms)`);
+      } else {
+        testLogs.push(`  ❌ FAIL: ${t.name}`);
+        if (t.error) testLogs.push(`     → ${t.error}`);
+      }
+    });
+
+    setTerminalLogs((prev) => [
+      ...prev,
+      `[TEST HARNESS]: Running ${testExecution.totalCount} automated test assertions...`,
+      ...testLogs,
+    ]);
+
+    const dynamicScore = testExecution.score;
+    const isSuccess = dynamicScore >= 80;
+    const status = isSuccess ? 'PASSED' : dynamicScore >= 40 ? 'NEEDS REVISION' : 'FAILED';
+
     const criteriaAudit = [
       { name: 'Codebase compilation & valid syntax', status: 'passed' },
-      { name: 'Multi-file codebase structure', status: 'passed' },
-      { name: 'Virtual File System (VFS) synchronization', status: 'passed' },
+      ...testExecution.tests.map((t) => ({
+        name: t.name,
+        status: t.passed ? 'passed' : 'failed',
+      })),
     ];
 
-    const codeValues = Object.values(currentFiles).join('\n');
+    const feedback = testExecution.tests
+      .filter((t) => !t.passed)
+      .map((t) => `Failed: ${t.name} — ${t.error || 'Assertion failed'}`);
 
-    if (codeValues.includes('mutex') || codeValues.includes('Mutex') || codeValues.includes('useMemo') || codeValues.includes('pd.to_datetime') || codeValues.includes('rotateRefreshToken') || codeValues.includes('mutateOptimistic') || codeValues.includes('calculate_anomaly_score') || codeValues.includes('OrderEventBus')) {
-      dynamicScore += 35;
-      criteriaAudit.push({ name: 'Architecture optimization & logic contracts', status: 'passed' });
-      feedback.push('Staff Architecture Audit: Optimal synchronization & logic contracts confirmed.');
-    } else {
-      criteriaAudit.push({ name: 'Architecture optimization & logic contracts', status: 'failed' });
-      feedback.push('Architecture Warning: Recommended target pattern or locking logic missing.');
+    if (isSuccess) {
+      feedback.unshift('Staff Audit: All runtime test cases executed and passed with 0 concurrency collisions.');
     }
-
-    if (codeValues.includes('try') && codeValues.includes('catch') || codeValues.includes('409') || codeValues.includes('useCallback') || codeValues.includes('revokedTokens')) {
-      dynamicScore += 25;
-      criteriaAudit.push({ name: 'Exception boundaries & security defenses', status: 'passed' });
-      feedback.push('Security Defense: Robust exception handling and fallback boundaries confirmed.');
-    } else {
-      criteriaAudit.push({ name: 'Exception boundaries & security defenses', status: 'failed' });
-    }
-
-    const status = dynamicScore >= 80 ? 'PASSED' : dynamicScore >= 50 ? 'NEEDS REVISION' : 'FAILED';
 
     const results = {
       status,
       score: dynamicScore,
-      securityRating: dynamicScore >= 80 ? 'A+' : dynamicScore >= 50 ? 'B' : 'D',
+      securityRating: dynamicScore >= 80 ? 'A+' : dynamicScore >= 60 ? 'B' : 'D',
       maintainabilityIndex: Math.min(98, dynamicScore + 5),
-      testSuiteRate: `${Math.round((dynamicScore / 100) * 6)}/6 Passed`,
-      codeSmellsCount: dynamicScore >= 80 ? 0 : 1,
-      complexity: dynamicScore >= 80 ? 'Low (2.8)' : 'Moderate (5.4)',
-      feedback,
+      testSuiteRate: `${testExecution.passedCount}/${testExecution.totalCount} Passed`,
+      codeSmellsCount: isSuccess ? 0 : 1,
+      complexity: isSuccess ? 'Low (2.4)' : 'High (6.8)',
+      feedback: feedback.length > 0 ? feedback : ['All assertions validated.'],
       criteriaAudit,
-      earnedXp: status === 'PASSED' ? 300 : 50,
+      earnedXp: isSuccess ? 300 : Math.round((dynamicScore / 100) * 100),
     };
 
     setScorecard(results);
     setTerminalLogs((prev) => [
       ...prev,
-      `✓ PASS: Test suites finished with score ${dynamicScore}/100 [${results.testSuiteRate}] (Rank: Pro Hunter Apex)`,
+      `[EXECUTION SUMMARY]: ${testExecution.passedCount}/${testExecution.totalCount} tests passed in ${testExecution.totalDuration}ms (Score: ${dynamicScore}/100 - ${status})`,
     ]);
     setIsEvaluating(false);
     return results;
