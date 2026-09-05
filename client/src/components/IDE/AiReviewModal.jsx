@@ -87,23 +87,23 @@ export default function AiReviewModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in select-none font-sans">
-      <div className="bg-[#0f172a] border-2 border-indigo-500/40 rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col text-slate-100 animate-in zoom-in-95 duration-200 max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-in fade-in select-none font-sans">
+      <div className="bg-zinc-900 border border-zinc-750 rounded-xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col text-zinc-100 max-h-[90vh]">
         
         {/* TOP BAR */}
-        <div className="flex items-center justify-between p-6 bg-[#0a0d14] border-b border-slate-800">
+        <div className="flex items-center justify-between p-5 bg-zinc-950 border-b border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 border border-indigo-500/30">
-              <Brain size={24} />
+            <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <Brain size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 text-purple-300 font-bold text-[10px] uppercase flex items-center gap-1">
-                  <Sparkles size={11} /> Gemini 2.0 Flash AI Reviewer
+                <span className="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-medium text-[10px] uppercase">
+                  AI Code Review
                 </span>
-                <span className="text-xs font-mono text-slate-400 font-bold">{scenarioTitle}</span>
+                <span className="text-xs font-mono text-zinc-400">{scenarioTitle}</span>
               </div>
-              <h2 className="text-xl font-black text-white mt-0.5">AI Staff Engineer Pull Request Review</h2>
+              <h2 className="text-base font-bold text-white mt-0.5">Automated Code Quality & Security Audit</h2>
             </div>
           </div>
 

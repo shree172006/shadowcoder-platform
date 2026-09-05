@@ -137,8 +137,8 @@ npm test
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in select-none">
-      <div className="bg-[#0f172a] border-2 border-slate-800 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col text-slate-100 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-in fade-in select-none">
+      <div className="bg-zinc-900 border border-zinc-750 rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col text-zinc-100 animate-in zoom-in-95 duration-150">
         
         {/* MODAL HEADER */}
         <div className="flex items-center justify-between p-6 bg-[#0a0d14] border-b border-slate-800">

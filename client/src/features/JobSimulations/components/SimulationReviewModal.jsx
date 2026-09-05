@@ -39,8 +39,8 @@ export default function SimulationReviewModal({
     : { title: 'Porter (Apprentice)', badge: '📦 Porter Tier', color: 'text-slate-400 border-slate-700 bg-slate-800/40' };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in select-none font-sans">
-      <div className="bg-[#0f172a] text-slate-100 p-6 sm:p-8 rounded-3xl border-2 border-slate-800 max-w-3xl w-full shadow-2xl space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-in fade-in select-none font-sans">
+      <div className="bg-zinc-900 text-zinc-100 p-6 rounded-xl border border-zinc-750 max-w-3xl w-full shadow-2xl space-y-6 animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto custom-scrollbar">
         
         {/* HEADER SCORE BANNER */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-6">

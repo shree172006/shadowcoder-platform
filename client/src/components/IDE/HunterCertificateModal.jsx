@@ -42,37 +42,34 @@ export default function HunterCertificateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in select-none">
-      <div className="bg-[#0f172a] border-2 border-amber-500/40 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col text-slate-100 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-in fade-in select-none">
+      <div className="bg-zinc-900 border border-zinc-750 rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col text-zinc-100 animate-in zoom-in-95 duration-150">
         
         {/* MODAL TOP BAR */}
-        <div className="flex items-center justify-between p-6 bg-[#0a0d14] border-b border-slate-800">
+        <div className="flex items-center justify-between p-5 bg-zinc-950 border-b border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
-              <Crown size={24} />
+            <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <Crown size={20} />
             </div>
             <div>
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-[10px] uppercase">
+              <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 font-medium text-[10px] uppercase font-mono">
                 Official Credential
               </span>
-              <h2 className="text-xl font-black text-white mt-0.5">Verified Hunter Certificate</h2>
+              <h2 className="text-base font-bold text-white mt-0.5">Verified Certificate</h2>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* CERTIFICATE CANVAS CARD */}
         <div className="p-6 overflow-y-auto max-h-[70vh] space-y-6">
-          <div className="p-8 rounded-3xl bg-gradient-to-br from-[#0c101d] via-[#101526] to-[#0a0d18] border-2 border-amber-500/40 shadow-2xl relative overflow-hidden text-center space-y-5">
-            
-            {/* Background Seal Watermark */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="p-6 rounded-xl bg-zinc-950 border border-zinc-800 relative overflow-hidden text-center space-y-4">
 
             <div className="flex items-center justify-center gap-2">
               <ShieldCheck size={28} className="text-amber-400" />

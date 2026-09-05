@@ -77,7 +77,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-40 w-full bg-white/90 dark:bg-[#07090e]/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 h-16 transition-colors duration-300 select-none">
+    <nav className="sticky top-0 z-40 w-full bg-white dark:bg-[#09090b] border-b border-zinc-200 dark:border-zinc-800 h-16 transition-colors duration-200 select-none">
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
         
         {/* LOGO */}

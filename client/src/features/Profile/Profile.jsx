@@ -136,9 +136,7 @@ export default function Profile() {
         {/* ═══════════════════════════════════════════════════════ */}
         {/* TOP HUNTER BANNER CARD */}
         {/* ═══════════════════════════════════════════════════════ */}
-        <div className="bg-[#0b0f19] border-2 border-indigo-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
             
             {/* AVATAR & NAME INFO */}
@@ -363,8 +361,8 @@ export default function Profile() {
       {/* BADGE INSPECTION MODAL */}
       {/* ═══════════════════════════════════════════════════════ */}
       {selectedBadge && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in">
-          <div className="bg-[#0f172a] border-2 border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-in fade-in">
+          <div className="bg-zinc-900 border border-zinc-750 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-5 text-center">
             
             <div className="w-20 h-20 mx-auto rounded-3xl bg-slate-950 border-2 border-indigo-500/40 flex items-center justify-center shadow-xl shadow-indigo-600/20">
               <BadgeIcon badgeId={selectedBadge.id} size={40} isLocked={!selectedBadge.isUnlocked} />

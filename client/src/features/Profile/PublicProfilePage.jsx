@@ -58,12 +58,8 @@ export default function PublicProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-slate-100 p-4 sm:p-8 font-sans select-none relative overflow-hidden">
-      
-      {/* BACKGROUND GLOW */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-5xl mx-auto space-y-8 relative z-10">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-4 sm:p-8 font-sans select-none">
+      <div className="max-w-5xl mx-auto space-y-6">
         
         {/* TOP RECRUITER VERIFICATION HEADER */}
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
