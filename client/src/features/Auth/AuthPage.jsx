@@ -258,14 +258,14 @@ export default function AuthPage() {
           </form>
 
           {/* Toggle link */}
-          <div className="mt-6 text-center">
+          <div className="mt-5 text-center space-y-3">
             <button
               type="button"
               onClick={() => {
                 setIsSignup(!isSignup);
                 setError('');
               }}
-              className="text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+              className="text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer block w-full"
             >
               {isSignup ? (
                 <>
@@ -276,6 +276,14 @@ export default function AuthPage() {
                   Don't have an account? <span className="text-indigo-400 font-medium underline">Sign up free</span>
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/admin')}
+              className="w-full py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-mono transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <ShieldCheck size={13} className="text-indigo-400" /> Enter Developer / Admin Portal
             </button>
           </div>
         </div>
