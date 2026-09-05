@@ -272,10 +272,11 @@ export default function GlobalLeaderboard() {
           isOpen={isCertOpen}
           onClose={() => setIsCertOpen(false)}
           userName={user?.name || 'Developer'}
-          tier={currentUserRank?.tier || 'Apex Shadow (Tier S)'}
-          userLevel={currentUserRank?.lvl || 1}
-          userXp={currentUserRank?.pts || 0}
+          tier={currentUserRank?.tier || 'Apprentice (Tier C)'}
+          userLevel={currentUserRank?.lvl || user?.level || 1}
+          userXp={currentUserRank?.pts || user?.xp || 0}
           track={user?.track || 'Full Stack Systems Architecture'}
+          completedCount={user?.completedScenarios?.length || user?.stats?.ticketsSolvedCount || 0}
         />
       )}
 

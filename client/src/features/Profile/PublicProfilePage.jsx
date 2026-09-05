@@ -5,44 +5,56 @@ import {
   ExternalLink, Code2, Briefcase, Sparkles, Brain, 
   Activity, Sword, Share2, Copy, Check, ArrowLeft, Crown 
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext.jsx';
 import BadgeIcon from '../Achievements/BadgeIcon.jsx';
 import { BADGES_CATALOG, RARITY_TIERS } from '../Achievements/badgesCatalog.js';
 
 export default function PublicProfilePage() {
   const { username } = useParams();
+  const { user } = useAuth();
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Formatted public profile data
+  // Dynamic real profile data
   const devData = useMemo(() => {
-    const formattedName = username 
-      ? username.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-      : 'Apex Engineer';
+    const isSelf = !username || (user && user.name?.toLowerCase().replace(/[^a-z0-9]/g, '-') === username.toLowerCase());
+    
+    const realName = isSelf ? (user?.name || 'Developer') : username.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const realLevel = isSelf ? (user?.level || 1) : 1;
+    const realXp = isSelf ? (user?.xp || 0) : 0;
+    const realTrack = isSelf && user?.track ? (user.track.charAt(0).toUpperCase() + user.track.slice(1) + ' Systems Architecture') : 'Full-Stack Systems Architecture';
+    const realStreak = isSelf ? (user?.streak?.currentCount || user?.streakDays || 0) : 0;
+
+    const tier = (realLevel >= 8 || realXp >= 3500)
+      ? 'Apex Shadow (Tier S)'
+      : (realLevel >= 5 || realXp >= 1500)
+      ? 'Senior Staff (Tier A)'
+      : (realLevel >= 2 || realXp >= 500)
+      ? 'Specialist (Tier B)'
+      : 'Apprentice (Tier C)';
 
     return {
-      username: username || 'developer',
-      name: formattedName,
-      tier: 'Pro Hunter (Apex)',
-      badgeTier: '🏆 Pro Hunter Pack',
-      level: 14,
-      xp: 3450,
-      streakDays: 12,
-      track: 'Full-Stack Systems Architecture',
-      rankPosition: '#4 National Hunter',
+      username: username || (user?.name ? user.name.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'developer'),
+      name: realName,
+      tier,
+      badgeTier: realLevel >= 5 ? '🏆 Senior Hunter Pack' : '🎖️ Verified Candidate',
+      level: realLevel,
+      xp: realXp,
+      streakDays: realStreak,
+      track: realTrack,
+      rankPosition: realXp > 0 ? `#${realLevel} Verified Hunter` : 'Candidate',
       verifiedTimestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      completedSimulations: [
-        { id: 'sim-be-01', title: 'Payment Mutex Synchronization', role: 'Backend Developer', score: 98, date: 'Aug 2026', passed: true },
-        { id: 'sim-fe-01', title: 'React Virtual DOM Re-render Engine', role: 'Frontend Engineer', score: 95, date: 'Aug 2026', passed: true },
-        { id: 'sim-fs-01', title: 'Virtual File System Stream Parser', role: 'Full Stack Engineer', score: 92, date: 'Aug 2026', passed: true },
-      ],
+      completedSimulations: user?.completedScenarios?.length > 0 
+        ? user.completedScenarios 
+        : [],
       skills: [
-        { name: 'Concurrency & Locking', level: 95 },
-        { name: 'React 19 & State Architecture', level: 92 },
-        { name: 'PostgreSQL & Query Optimization', level: 88 },
-        { name: 'System Design & Event Buses', level: 90 },
+        { name: 'Concurrency & Locking', level: Math.min(100, Math.floor((realXp / 3000) * 75) + 25) },
+        { name: 'React 19 & State Architecture', level: Math.min(100, Math.floor((realXp / 2500) * 70) + 20) },
+        { name: 'PostgreSQL & Query Optimization', level: Math.min(100, Math.floor((realXp / 2000) * 65) + 20) },
+        { name: 'System Design & Event Buses', level: Math.min(100, Math.floor((realXp / 2800) * 70) + 20) },
       ],
-      badges: ['sim_first', 'sim_5', 'track_junior', 'track_mid', 'streak_7', 'audit_perfect', 'pr_approved'],
+      badges: user?.badges && user.badges.length > 0 ? user.badges.map(b => typeof b === 'string' ? b : b.badgeId) : ['sim_first'],
     };
-  }, [username]);
+  }, [username, user]);
 
   const handleCopyProfileUrl = () => {
     navigator.clipboard.writeText(window.location.href);

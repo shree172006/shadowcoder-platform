@@ -69,10 +69,11 @@ export function AuthProvider({ children }) {
         role: role || 'student',
         track: track || 'fullstack',
         level: 1,
-        xp: 150,
+        xp: 0,
         tier: 1,
-        hunterRank: 'E-Rank Novice',
-        streakDays: 1,
+        hunterRank: 'Apprentice (Tier C)',
+        streakDays: 0,
+        completedScenarios: [],
       };
       setUser(fallback);
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(fallback));
@@ -105,10 +106,11 @@ export function AuthProvider({ children }) {
         role: 'student',
         track: 'fullstack',
         level: 1,
-        xp: 150,
+        xp: 0,
         tier: 1,
-        hunterRank: 'E-Rank Novice',
-        streakDays: 1,
+        hunterRank: 'Apprentice (Tier C)',
+        streakDays: 0,
+        completedScenarios: [],
       };
       setUser(fallback);
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(fallback));
@@ -154,10 +156,11 @@ export function AuthProvider({ children }) {
           role: 'student',
           track: 'fullstack',
           level: 1,
-          xp: 150,
+          xp: 0,
           tier: 1,
-          hunterRank: 'E-Rank Novice',
-          streakDays: 1,
+          hunterRank: 'Apprentice (Tier C)',
+          streakDays: 0,
+          completedScenarios: [],
         };
         setUser(fallback);
         localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(fallback));
