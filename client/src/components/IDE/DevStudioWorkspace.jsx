@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Folder, Search, Cpu, Settings, Play, CheckCircle2, 
   TerminalSquare, Send, Sparkles, ChevronLeft, ChevronRight, 
-  Layers, ShieldCheck, Brain, ClipboardList, Maximize2, Minimize2 
+  Layers, ShieldCheck, Brain, ClipboardList, Maximize2, Minimize2,
+  ArrowLeft 
 } from 'lucide-react';
 import FileTreeExplorer from './FileTreeExplorer.jsx';
 import MonacoEditorPane from './MonacoEditorPane.jsx';
@@ -161,12 +163,12 @@ export default function DevStudioWorkspace({
       {/* ═══════════════════════════════════════════════════════ */}
       <div className="flex items-center justify-between px-4 py-2 bg-[#090d14] border-b border-slate-800 text-xs shrink-0">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <h2 className="font-black text-white tracking-tight">{title}</h2>
-          </div>
-          <span className="text-slate-600">|</span>
-          <span className="text-slate-400 font-mono text-[11px] hidden sm:inline">{subtitle}</span>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-colors border border-slate-700/50"
+          >
+            <ArrowLeft size={13} /> Back to Home
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">

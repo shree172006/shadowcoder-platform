@@ -222,14 +222,6 @@ export default function ProblemWorkspace() {
           logs={terminalLogs}
           onClearLogs={() => setTerminalLogs([])}
           scenarioContext={problem}
-          extraTopRightActions={
-            <Link
-              to="/problems"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all mr-2"
-            >
-              <ArrowLeft size={13} /> Back to Problems
-            </Link>
-          }
         />
       </div>
     </DesktopOnly>

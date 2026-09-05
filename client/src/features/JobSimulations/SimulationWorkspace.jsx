@@ -625,14 +625,6 @@ export default function SimulationWorkspace() {
           logs={terminalLogs}
           onClearLogs={() => setTerminalLogs([])}
           scenarioContext={scenario}
-          extraTopRightActions={
-            <Link
-              to="/simulations"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all mr-2"
-            >
-              <ArrowLeft size={13} /> Exit to Catalog
-            </Link>
-          }
         />
 
         {/* CODE REVIEW & AUDIT MODAL */}
